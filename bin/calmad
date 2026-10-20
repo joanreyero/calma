@@ -1,0 +1,4 @@
+#!/bin/sh
+# Calma daemon entry point (run by calma.service and calma-watchdog.service).
+export PYTHONPATH="/usr/lib/calma${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m calma.daemon "$@"

@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Runs every check for the bar plugin, headless: ruff on the mock daemon,
+# the Model.js unit tests under node, qmllint on the QML, and the Service.qml
+# integration test against a mock daemon on the port in dev/TestPort.js.
+set -euo pipefail
+
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+port="$(grep -oE "[0-9]+" "$root/dev/TestPort.js" | head -1)"
+
+echo "== ruff"
+if command -v uvx >/dev/null; then
+  uvx ruff check "$root/dev/mock-daemon.py"
+  uvx ruff format --check "$root/dev/mock-daemon.py"
+else
+  echo "uvx missing, skipping ruff"
+fi
+
+echo "== node tests"
+node --test "$root/dev/model.test.mjs"
+
+echo "== qmllint"
+qmllint="${QMLLINT:-/usr/lib/qt6/bin/qmllint}"
+if [[ -x "$qmllint" ]]; then
+  imports="$(mktemp -d)"
+  trap 'rm -rf "$imports"' EXIT
+  ln -s "${OMARCHY_PATH:-/usr/share/omarchy}/shell" "$imports/qs"
+  # Built-in widgets trip the same two rules: qmllint cannot see Style's grouped
+  # QtObject members (missing-property) or `root` across Component boundaries
+  # (unqualified). Anything else fails the run.
+  if "$qmllint" -I "$imports" -I /usr/lib/qt6/qml "$root/Service.qml" "$root/Panel.qml" 2>&1 \
+      | grep -E '^(Warning|Error)' | grep -Ev '\[(unqualified|missing-property)\]'; then
+    echo "qmllint reported issues"; exit 1
+  fi
+  echo "ok"
+else
+  echo "qmllint missing, skipping"
+fi
+
+echo "== Service.qml against the mock daemon on :$port"
+python3 "$root/dev/mock-daemon.py" "$port" 2>/dev/null &
+mock=$!
+trap 'kill "$mock" 2>/dev/null; rm -rf "$imports"' EXIT
+for _ in $(seq 1 50); do
+  curl -fsS "http://127.0.0.1:$port/status" >/dev/null 2>&1 && break
+  sleep 0.1
+done
+
+runner="${QML_TEST_RUNNER:-/usr/lib/qt6/bin/qmltestrunner}"
+QT_QPA_PLATFORM=offscreen QT_QUICK_BACKEND=software \
+  "$runner" -input "$root/dev/tst_service.qml" -o -,txt

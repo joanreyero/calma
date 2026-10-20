@@ -1,0 +1,106 @@
+/* Calma: the minimal X. CSS does as much as possible; x.js marks what CSS can't see.
+   `data-calma-hide` is set by x.js on elements that need JS to identify. */
+
+/* Right sidebar: trends, who to follow, premium upsells. x.js hides every sibling of the
+   search box's ancestors (data-calma-hide); these explicit ones apply before it runs. */
+[data-testid="sidebarColumn"] aside,
+[data-testid="sidebarColumn"] section,
+[data-testid="sidebarColumn"] [aria-label^="Timeline: Trending"],
+[data-testid="sidebarColumn"] [aria-label^="Timeline: Carousel"],
+[data-testid="sidebarColumn"] [aria-label="Who to follow"],
+[data-testid="sidebarColumn"] [aria-label^="Relevant people"],
+[data-testid="sidebarColumn"] nav[aria-label="Footer"],
+[data-testid="sidebarColumn"] [data-testid="trend"],
+[data-testid="sidebarColumn"] a[href="/i/premium_sign_up"],
+[data-testid="sidebarColumn"] a[href^="/i/verified-choose"] {
+  display: none !important;
+}
+
+/* Left nav items we don't want. Both desktop nav and the mobile bottom bar. */
+nav[aria-label="Primary"] a[href="/explore"],
+nav[aria-label="Primary"] a[href="/i/grok"],
+nav[aria-label="Primary"] a[href^="/i/communities"],
+nav[aria-label="Primary"] a[href$="/communities"],
+nav[aria-label="Primary"] a[href="/i/premium_sign_up"],
+nav[aria-label="Primary"] a[href^="/i/premium"],
+nav[aria-label="Primary"] a[href^="/i/verified-orgs-signup"],
+nav[aria-label="Primary"] a[href^="/i/verified-choose"],
+nav[aria-label="Primary"] a[href="/jobs"],
+nav[aria-label="Primary"] a[href^="/jobs"],
+nav[aria-label="Primary"] a[href*="business.x.com"],
+nav[aria-label="Primary"] a[href*="ads.x.com"],
+nav[aria-label="Primary"] a[href^="/i/monetization"],
+nav[aria-label="Primary"] a[href^="/i/articles"],
+nav[aria-label="Primary"] a[href^="/i/spaces"],
+nav[aria-label="Primary"] a[href^="/i/chat"],
+nav[aria-label="Primary"] a[data-testid="AppTabBar_Explore_Link"],
+nav[aria-label="Primary"] a[data-testid="premium-signup-tab"],
+nav[aria-label="Primary"] a[data-testid="premium-hub-tab"],
+nav[aria-label="Primary"] a[aria-label="Grok"],
+nav[aria-label="Primary"] a[aria-label="Premium"],
+nav[aria-label="Primary"] a[aria-label="Communities"],
+nav[aria-label="Primary"] a[aria-label="Explore"],
+nav[aria-label="Primary"] a[aria-label="Search and explore"],
+nav[aria-label="Primary"] a[aria-label="Verified Orgs"],
+nav[aria-label="Primary"] a[aria-label="Jobs"],
+nav[aria-label="Primary"] a[aria-label="Business"],
+nav[aria-label="Primary"] a[aria-label="Monetization"],
+nav[aria-label="Primary"] a[aria-label="Articles"],
+[data-testid="BottomBar"] a[href="/explore"],
+[data-testid="BottomBar"] a[href="/i/grok"],
+[data-testid="BottomBar"] a[href^="/i/communities"],
+[data-calma-hide] {
+  display: none !important;
+}
+
+/* Grok button in the composer and on posts; the Grok "explain this post" action. */
+button[aria-label="Grok actions"],
+button[aria-label^="Grok"],
+button[data-testid="GrokDrawerHeader"],
+[data-testid="GrokDrawer"],
+a[href="/i/grok"]:not([role="tab"]) {
+  display: none !important;
+}
+
+/* Promoted posts. */
+[data-testid="cellInnerDiv"]:has([data-testid="placementTracking"]),
+[data-testid="cellInnerDiv"]:has(article[data-testid="tweet"] [data-testid="promotedIndicator"]),
+article[data-testid="tweet"]:has([data-testid="placementTracking"]) {
+  display: none !important;
+}
+
+/* Inline suggestions in timelines: who to follow, you might like, creators to follow,
+   the "Show more" link to connect_people. People pages keep their user cells. */
+body:not([data-calma-people]) [data-testid="primaryColumn"] [data-testid="cellInnerDiv"]:has([data-testid="UserCell"]),
+body:not([data-calma-people]) [data-testid="primaryColumn"] [data-testid="cellInnerDiv"]:has(> div > a[href="/i/connect_people"]),
+body:not([data-calma-people]) [data-testid="primaryColumn"] [data-testid="cellInnerDiv"]:has(a[href^="/i/connect_people"][role="link"]:only-child) {
+  display: none !important;
+}
+
+/* Premium upsells inlined in the timeline and the "Subscribe to Premium" banners. */
+[data-testid="cellInnerDiv"]:has(a[href="/i/premium_sign_up"]),
+[data-testid="cellInnerDiv"]:has(a[href^="/i/verified-choose"]),
+[data-testid="inlinePrompt"],
+[data-testid="super-upsell-UpsellCardRenderProperties"],
+aside[aria-label*="Premium"],
+aside[aria-label*="Subscribe"] {
+  display: none !important;
+}
+
+/* The "For you" tab is marked by x.js (text match); we also hide the whole tab bar
+   when only "Following" would remain so the header doesn't look odd. */
+[role="tab"][data-calma-foryou] {
+  display: none !important;
+}
+
+/* Spaces bar and live-video promos at the top of home. */
+[data-testid="primaryColumn"] [aria-label="Spaces"],
+[data-testid="cellInnerDiv"]:has([data-testid="SpacesTimelineCard"]),
+[data-testid="cellInnerDiv"]:has([data-testid="eventSummary"]) {
+  display: none !important;
+}
+
+/* Let the main column breathe with the sidebar gone. */
+[data-testid="primaryColumn"] {
+  border-right-width: 1px !important;
+}

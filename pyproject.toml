@@ -1,0 +1,21 @@
+[project]
+name = "calma"
+version = "0.1.0"
+description = "A bulletproof distraction blocker for Omarchy"
+requires-python = ">=3.12"
+dependencies = []
+license = "MIT"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["SIM108", "SIM105", "SIM102"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]

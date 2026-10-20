@@ -1,0 +1,8 @@
+[Unit]
+Description=Calma watchdog: re-enable the daemon and repair policy and flags
+Documentation=https://github.com/joanreyero/calma
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/calma/calmad --watchdog

@@ -172,7 +172,7 @@ PRESETS = {
   },
   "youtube": {
     "label": "YouTube",
-    "glyph": "",
+    "glyph": "",
     "domains": ["youtube.com", "youtu.be", "youtube-nocookie.com"],
     "hosts": ["youtube.com", "www.youtube.com", "m.youtube.com", "music.youtube.com", "youtu.be", "www.youtube-nocookie.com"],
     "allow": ["youtube.com/watch", "youtube.com/results", "youtube.com/feed/subscriptions",

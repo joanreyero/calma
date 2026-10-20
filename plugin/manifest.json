@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.joanreyero.calma",
+  "name": "Calma",
+  "version": "0.1.0",
+  "author": "Joan Reyero",
+  "license": "MIT",
+  "description": "Calma in the Omarchy bar: the running session's countdown, every rule's state and budget, and a button to start or end a session.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Calma",
+    "description": "Countdown of the open session; click for every rule, its sessions and minutes left, and Start / End buttons.",
+    "category": "Productivity",
+    "aliases": [
+      "calma",
+      "focus",
+      "blocker"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "hideWhenIdle": true,
+      "port": 7390
+    },
+    "schema": [
+      {
+        "key": "hideWhenIdle",
+        "type": "boolean",
+        "label": "Hide the widget when no session is open",
+        "defaultValue": true
+      },
+      {
+        "key": "port",
+        "type": "integer",
+        "label": "Daemon port",
+        "description": "The port calmad listens on at 127.0.0.1. Leave at 7390 unless CALMA_PORT is set.",
+        "min": 1,
+        "max": 65535,
+        "step": 1,
+        "defaultValue": 7390
+      }
+    ]
+  }
+}

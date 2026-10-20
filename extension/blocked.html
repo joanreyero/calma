@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Calma</title>
+  <link rel="stylesheet" href="blocked.css">
+</head>
+<body data-state="loading">
+  <main class="card" aria-live="polite">
+    <div class="glyph" id="glyph" aria-hidden="true">·</div>
+    <h1 class="label" id="label">Calma</h1>
+    <p class="message" id="message">One moment.</p>
+    <p class="budget" id="budget"></p>
+
+    <form class="action" id="action" hidden>
+      <label class="minutes" id="minutes-field" hidden>
+        <input type="number" id="minutes" min="1" step="1" inputmode="numeric" aria-label="Minutes">
+        <span>min</span>
+      </label>
+      <button type="submit" class="primary" id="open">Start a session</button>
+    </form>
+
+    <p class="note" id="note" hidden></p>
+    <p class="error" id="error" role="alert" hidden></p>
+  </main>
+
+  <footer class="footer">
+    <span>Calma</span>
+    <span class="dot" aria-hidden="true">·</span>
+    <span><code>calma status</code> in a terminal</span>
+  </footer>
+
+  <script src="blocked.js"></script>
+</body>
+</html>

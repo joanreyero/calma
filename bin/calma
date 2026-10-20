@@ -1,0 +1,4 @@
+#!/bin/sh
+# Calma CLI entry point. The package is installed under /usr/lib/calma.
+export PYTHONPATH="/usr/lib/calma${PYTHONPATH:+:$PYTHONPATH}"
+exec python3 -m calma "$@"

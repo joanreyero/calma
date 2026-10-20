@@ -1,0 +1,89 @@
+/* Calma countdown pill (bottom-right, on rule domains during a session). */
+
+#calma-countdown {
+  --calma-accent: #7aa2f7;
+  --calma-bg: #1a1b26;
+  --calma-fg: #c0caf5;
+  --calma-red: #f7768e;
+
+  all: initial;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 8px 14px;
+  border-radius: 999px;
+  font: 500 13px/1 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--calma-fg);
+  background: color-mix(in srgb, var(--calma-bg) 86%, transparent);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  border: 1px solid color-mix(in srgb, var(--calma-accent) 40%, transparent);
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.5);
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: border-color 300ms ease, box-shadow 300ms ease, opacity 300ms ease;
+}
+
+#calma-countdown .calma-brand {
+  color: var(--calma-accent);
+  letter-spacing: 0.01em;
+}
+
+#calma-countdown .calma-dot {
+  opacity: 0.5;
+}
+
+#calma-countdown .calma-time {
+  min-width: 3.2ch;
+  text-align: right;
+  color: var(--calma-fg);
+}
+
+#calma-countdown .calma-end {
+  all: unset;
+  cursor: pointer;
+  margin-left: 4px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--calma-fg);
+  background: color-mix(in srgb, var(--calma-fg) 10%, transparent);
+  transition: background 150ms ease;
+}
+
+#calma-countdown .calma-end:hover {
+  background: color-mix(in srgb, var(--calma-fg) 18%, transparent);
+}
+
+#calma-countdown .calma-end:focus-visible {
+  outline: 2px solid var(--calma-accent);
+  outline-offset: 1px;
+}
+
+#calma-countdown .calma-end[disabled] {
+  cursor: default;
+  opacity: 0.6;
+}
+
+#calma-countdown.calma-urgent {
+  border-color: color-mix(in srgb, var(--calma-red) 60%, transparent);
+}
+
+#calma-countdown.calma-urgent .calma-brand,
+#calma-countdown.calma-urgent .calma-time {
+  color: var(--calma-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #calma-countdown,
+  #calma-countdown .calma-end {
+    transition: none;
+  }
+}
