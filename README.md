@@ -1,5 +1,7 @@
 # Calma
 
+Website: https://calma.sh
+
 Calma is a distraction blocker for Omarchy (Arch Linux, Hyprland, Chromium) that is hard to
 argue with. You decide how many short sessions a day you get on X, YouTube or anything else;
 outside those sessions the sites and apps are blocked at the system level, and inside them you

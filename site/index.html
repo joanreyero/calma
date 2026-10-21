@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#1a1b26">
+  <title>Calma: your attention back, in sessions you choose</title>
+  <meta name="description" content="Calma is a distraction blocker for Omarchy that is hard to argue with. X twice a day, five minutes each; outside those sessions the sites are blocked at the system level, inside them you get the minimal site. Tightening is free, loosening needs a password you can give away. Free, MIT, no backend.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Calma: your attention back, in sessions you choose">
+  <meta property="og:description" content="A distraction blocker for Omarchy that is hard to argue with. Short daily sessions on X or YouTube, the minimal site inside them, system-level blocks outside. Tighten for free; loosen only with a password you can give away.">
+  <meta property="og:url" content="https://calma.sh">
+  <meta property="og:site_name" content="Calma">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Calma: your attention back, in sessions you choose">
+  <meta name="twitter:description" content="A distraction blocker for Omarchy that is hard to argue with. Free, MIT, no backend.">
+  <link rel="canonical" href="https://calma.sh">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="wordmark" href="#top" aria-label="Calma home"><span class="mark" aria-hidden="true"></span>calma</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="https://github.com/joanreyero/calma">GitHub</a>
+      <a href="#install">Install</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <p class="eyebrow">A distraction blocker for Omarchy</p>
+      <h1>Your attention back, in sessions you choose.</h1>
+      <p class="tagline">X twice a day, five minutes each. Outside those sessions the site is blocked for the whole machine; inside them you get only the people you follow. Tightening is free. Loosening needs a password you can give to someone else.</p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="#install">Install</a>
+        <a class="btn btn-ghost" href="https://github.com/joanreyero/calma">GitHub</a>
+      </div>
+      <p class="hero-meta">Arch + Hyprland + Chromium · free · MIT · no backend</p>
+    </div>
+
+    <div class="hero-demo" id="demo" aria-live="polite">
+      <div class="frame" data-state="blocked" id="frame">
+        <div class="frame-bar" aria-hidden="true">
+          <span class="frame-dots"><i></i><i></i><i></i></span>
+          <span class="frame-url" id="frame-url">x.com/home</span>
+        </div>
+
+        <!-- state: blocked (budget left) and spent -->
+        <div class="blocked" id="blocked">
+          <div class="card">
+            <div class="glyph" aria-hidden="true">𝕏</div>
+            <p class="label">X</p>
+            <p class="message" id="message">X is resting. Start a session when you're ready.</p>
+            <p class="budget" id="budget"><span>Sessions today: 1 of 2</span> <span>· 5 min each</span> <span>· 5 min left</span></p>
+            <div class="action" id="action"><button type="button" class="primary" id="start">Start a 5-minute session</button></div>
+            <p class="note" id="note" hidden>Back at <strong>04:00 tomorrow</strong></p>
+          </div>
+          <p class="card-foot">Calma <span>·</span> <code>calma status</code> in a terminal</p>
+        </div>
+
+        <!-- state: open (minimal X with the countdown pill) -->
+        <div class="open" id="open" hidden aria-label="A minimal X timeline with the Calma countdown">
+          <div class="wire wire-x">
+            <aside class="wire-nav"><i class="dot-x"></i><i></i><i></i><i></i><i></i></aside>
+            <div class="wire-main">
+              <div class="wire-tabs"><span class="on">Following</span></div>
+              <div class="wire-post"><i></i><b><u class="w40"></u><u></u><u class="w70"></u></b></div>
+              <div class="wire-post"><i></i><b><u class="w30"></u><u class="w90"></u></b></div>
+              <div class="wire-post"><i></i><b><u class="w50"></u><u></u><u class="w60"></u></b></div>
+              <div class="wire-post"><i></i><b><u class="w40"></u><u class="w70"></u></b></div>
+              <div class="wire-post"><i></i><b><u class="w30"></u><u></u><u class="w50"></u></b></div>
+              <div class="wire-post"><i></i><b><u class="w60"></u><u class="w90"></u></b></div>
+            </div>
+            <aside class="wire-side"><span class="wire-search"></span></aside>
+          </div>
+          <div class="pill"><span>Calma</span><span class="sep">·</span><span class="time" id="pill-time">4:32</span><span class="sep">·</span><button type="button" id="end">End now</button></div>
+        </div>
+      </div>
+      <div class="demo-steps" id="demo-steps" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <!-- INSTALL STRIP -->
+  <section class="wrap">
+    <div class="strip">
+      <div class="strip-cell strip-title">
+        <span class="strip-k">Install</span>
+        <span class="strip-v">Omarchy plugin</span>
+      </div>
+      <div class="strip-cell strip-cmd">
+        <code id="strip-code">omarchy plugin add https://github.com/joanreyero/calma --enable</code>
+        <button class="copy" data-copy-target="strip-code" type="button">Copy</button>
+      </div>
+      <div class="strip-cell strip-end">
+        <a href="#install">Then click the leaf in the bar →</a>
+        <span>Free. MIT. No telemetry.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE MODEL -->
+  <section class="wrap section" id="model">
+    <p class="eyebrow">The model</p>
+    <h2>A budget of short sessions, and a door that only closes further.</h2>
+    <p class="sub">Four ideas, nothing else to learn.</p>
+
+    <div class="blocks">
+      <article class="block">
+        <p class="block-k">Rules</p>
+        <p>A rule is a set of websites and apps with a daily budget: so many sessions a day, so many minutes each. <code>x</code> and <code>youtube</code> come as presets; anything else is a list of domains and process names.</p>
+      </article>
+      <article class="block">
+        <p class="block-k">Sessions</p>
+        <p>Outside a session the rule is blocked: Chromium refuses the sites, nothing on the machine can resolve the domains, listed apps are killed as they start. Inside a session you get the minimal site. When the time is up the tabs close.</p>
+      </article>
+      <article class="block">
+        <p class="block-k">Tighten for free</p>
+        <p>Fewer sessions, shorter sessions, more domains, a new rule: any time, no questions asked. Loosening anything, more time, removing a site or a rule, uninstalling, asks for the Calma password.</p>
+      </article>
+      <article class="block">
+        <p class="block-k">Give the password away</p>
+        <p>Set a password and hand it to someone you trust: now it is out of your reach. Never set one and nothing can ever be loosened. Either way, the version of you at eleven at night does not get a vote.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- MINIMAL SITES -->
+  <section class="wrap section" id="minimal">
+    <p class="eyebrow">Inside a session</p>
+    <h2>Minimal X, minimal YouTube.</h2>
+    <p class="sub">The site you came for, without the parts built to keep you there. Enforced twice: Chromium's managed policy keeps the paths closed, and the extension hides what is left.</p>
+
+    <div class="minimal-grid">
+      <article class="minimal">
+        <header class="minimal-head"><span class="glyph-s" aria-hidden="true">𝕏</span><h3>X</h3></header>
+        <div class="wires" aria-hidden="true">
+          <div class="wire-pane">
+            <p class="wire-k">Without Calma</p>
+            <div class="wire wire-x wire-full">
+              <aside class="wire-nav"><i class="dot-x"></i><i></i><i></i><i></i><i></i><i></i><i></i></aside>
+              <div class="wire-main">
+                <div class="wire-tabs"><span class="on">For you</span><span>Following</span></div>
+                <div class="wire-post"><i></i><b><u class="w40"></u><u></u></b></div>
+                <div class="wire-post promo"><i></i><b><u class="w30"></u><u class="w90"></u></b></div>
+                <div class="wire-post"><i></i><b><u class="w50"></u><u></u></b></div>
+              </div>
+              <aside class="wire-side"><span class="wire-search"></span><span class="wire-box"></span><span class="wire-box tall"></span></aside>
+            </div>
+          </div>
+          <div class="wire-pane">
+            <p class="wire-k on">With Calma</p>
+            <div class="wire wire-x">
+              <aside class="wire-nav"><i class="dot-x"></i><i></i><i></i><i></i></aside>
+              <div class="wire-main">
+                <div class="wire-tabs"><span class="on">Following</span></div>
+                <div class="wire-post"><i></i><b><u class="w40"></u><u></u></b></div>
+                <div class="wire-post"><i></i><b><u class="w30"></u><u class="w90"></u></b></div>
+                <div class="wire-post"><i></i><b><u class="w50"></u><u></u></b></div>
+              </div>
+              <aside class="wire-side"><span class="wire-search"></span></aside>
+            </div>
+          </div>
+        </div>
+        <div class="cols">
+          <div>
+            <p class="col-k">Stays</p>
+            <ul class="keep">
+              <li>Following timeline</li>
+              <li>Search</li>
+              <li>Profiles and threads</li>
+              <li>Notifications, messages</li>
+            </ul>
+          </div>
+          <div>
+            <p class="col-k">Goes</p>
+            <ul class="gone">
+              <li>For you</li>
+              <li>Explore and trends</li>
+              <li>Grok</li>
+              <li>Promoted posts</li>
+              <li>Who to follow, Discover more</li>
+              <li>Communities, Premium prompts</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="minimal">
+        <header class="minimal-head"><span class="glyph-s yt" aria-hidden="true">▶</span><h3>YouTube</h3></header>
+        <div class="wires" aria-hidden="true">
+          <div class="wire-pane">
+            <p class="wire-k">Without Calma</p>
+            <div class="wire wire-yt wire-full">
+              <div class="wire-top"><i class="dot-yt"></i><span class="wire-search"></span></div>
+              <div class="wire-body">
+                <aside class="wire-nav"><i></i><i></i><i></i><i></i><i></i></aside>
+                <div class="wire-main">
+                  <div class="wire-chips"><span></span><span></span><span></span><span></span></div>
+                  <div class="wire-thumbs"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <div class="wire-shorts"><i></i><i></i><i></i><i></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="wire-pane">
+            <p class="wire-k on">With Calma</p>
+            <div class="wire wire-yt">
+              <div class="wire-top"><i class="dot-yt"></i><span class="wire-search"></span></div>
+              <div class="wire-body">
+                <aside class="wire-nav"><i></i><i></i></aside>
+                <div class="wire-main">
+                  <div class="wire-player"></div>
+                  <u class="w60"></u>
+                  <u class="w30"></u>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cols">
+          <div>
+            <p class="col-k">Stays</p>
+            <ul class="keep">
+              <li>Subscriptions</li>
+              <li>Search</li>
+              <li>Channels and playlists</li>
+              <li>Watching a video</li>
+              <li>History, library</li>
+            </ul>
+          </div>
+          <div>
+            <p class="col-k">Goes</p>
+            <ul class="gone">
+              <li>Home feed</li>
+              <li>Shorts</li>
+              <li>Related videos, end screens</li>
+              <li>Comments</li>
+              <li>Autoplay</li>
+              <li>Explore, trending, gaming</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+    </div>
+    <p class="after">Wireframes, not screenshots. On X, <code>/home</code> opens on Following and the For you tab is gone; on YouTube, <code>/</code> and <code>/shorts</code> land on your subscriptions and the autoplay switch is turned off every time it comes back on.</p>
+  </section>
+
+  <!-- FIVE LAYERS -->
+  <section class="wrap section" id="layers">
+    <p class="eyebrow">Outside a session</p>
+    <h2>Five layers, each covering for the others.</h2>
+    <p class="sub">Nothing clever. Several plain mechanisms, so that no single one is the thing you talk yourself around.</p>
+
+    <ol class="layers">
+      <li><span class="layer-n">01</span><div><b>Chromium managed policy.</b> A policy file every Chromium window of every user obeys and that cannot be changed from inside the browser. Blocked domains while a rule rests; only the minimal paths while it is open.</div></li>
+      <li><span class="layer-n">02</span><div><b>Hosts file.</b> While a rule is blocked its domains resolve to nowhere for the whole machine, so Firefox, curl or a desktop app cannot reach them either.</div></li>
+      <li><span class="layer-n">03</span><div><b>Process killing.</b> A rule may list process names (<code>steam</code>, <code>discord</code>); while blocked they are killed within a second of starting.</div></li>
+      <li><span class="layer-n">04</span><div><b>Browser extension.</b> Loaded by a flag in <code>/etc/chromium-flags.conf</code>. It draws the calm blocked page, shows the countdown, hides feeds and recommendations during a session and closes the tabs the moment it ends.</div></li>
+      <li><span class="layer-n">05</span><div><b>Self-protection.</b> A system service that refuses to be stopped and restarts in a second if killed; a watchdog every minute that repairs the policy and flags; a rules file accepted only when the change tightens or is signed with the password-protected key. Anything else is reverted, logged and shown as a notification.</div></li>
+    </ol>
+  </section>
+
+  <!-- HONESTY -->
+  <section class="wrap section" id="root">
+    <div class="honest">
+      <div>
+        <p class="eyebrow">Honesty about root</p>
+        <h2>Calma defeats impulse, not a determined root user with an hour to spare.</h2>
+      </div>
+      <div class="honest-text">
+        <p>Linux gives root the final word, and you are root on your own machine. Every known bypass takes several deliberate steps as root: stopping a service that refuses to stop, editing files the daemon rewrites, deleting the daemon's own trust store, or removing Chromium's policy directory. None of them happens by accident, none of them is one command, and <code>calma doctor</code> tells you when any of them has been done.</p>
+        <p>The adversary is the five seconds between "I'll just check X" and the tab being open. The goal is that removing Calma is a conscious project, not a reflex. The full list of bypasses, with step counts, is written down on purpose.</p>
+        <a class="more" href="https://github.com/joanreyero/calma/blob/main/docs/threat-model.md">Threat model →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL -->
+  <section class="wrap section" id="install">
+    <p class="eyebrow">Install</p>
+    <h2>Three steps, with your agent or by hand.</h2>
+    <p class="sub">Omarchy (Arch Linux, Hyprland, Chromium). The repository is the Omarchy shell plugin: the bar widget comes first and installs the rest.</p>
+
+    <div class="install-grid">
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <p class="step-k">Add the plugin</p>
+            <div class="code-panel">
+              <div class="code-head code-head-row"><span>terminal</span><button class="copy copy-small" data-copy-target="step1" type="button">Copy</button></div>
+<pre class="code code-wrap" id="step1"><span class="p">$</span> omarchy plugin add https://github.com/joanreyero/calma --enable</pre>
+            </div>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <p class="step-k">Click the leaf in the bar, then <em>Set up with the agent</em></p>
+            <p>Your default coding agent opens with the setup guide and walks you through the install (you run the <code>sudo</code> lines), the password choice and your first rules. Prefer to do it yourself? The manual path is below.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <p class="step-k">Restart Chromium</p>
+            <p>It picks up the policy and loads the extension. From then on the blocked page, the bar widget and the CLI all start sessions.</p>
+          </div>
+        </li>
+      </ol>
+
+      <div class="install-panels">
+        <div class="code-panel">
+          <div class="code-head code-head-row"><span>Manual path</span><button class="copy copy-small" data-copy-target="manual" type="button">Copy</button></div>
+<pre class="code code-wrap" id="manual"><span class="p">$</span> cd ~/.config/omarchy/plugins/io.github.joanreyero.calma
+<span class="p">$</span> sudo ./install.sh
+<span class="p">$</span> sudo calma password        <span class="c"># optional, recommended</span>
+<span class="p">$</span> sudo calma add x --preset x --sessions 2 --minutes 5</pre>
+        </div>
+        <div class="code-panel">
+          <div class="code-head code-head-row"><span>Every day</span><button class="copy copy-small" data-copy-target="daily" type="button">Copy</button></div>
+<pre class="code code-wrap" id="daily"><span class="p">$</span> calma status      <span class="c"># blocked, open, what is left today</span>
+<span class="p">$</span> calma open x      <span class="c"># start a 5-minute session</span>
+<span class="p">$</span> calma close       <span class="c"># end early; unused time stays in the budget</span>
+<span class="p">$</span> calma doctor      <span class="c"># check that every layer is in place</span></pre>
+        </div>
+        <p class="after small">Without a preset: <code>sudo calma add steam --domain store.steampowered.com --process steam --sessions 1 --minutes 60</code>. The day resets at 04:00. A git clone works too; <code>install.sh</code> knows nothing about the plugin.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="wrap section" id="faq">
+    <p class="eyebrow">Questions</p>
+    <h2>Short answers.</h2>
+    <dl class="faq">
+      <div>
+        <dt>I forgot the password.</dt>
+        <dd>Then nothing can be loosened. That is the point. Tightening still works, sessions still work, and the rules you set stay as they are.</dd>
+      </div>
+      <div>
+        <dt>Can I use Firefox or another browser?</dt>
+        <dd>While a rule is blocked, the hosts layer makes its domains unreachable from every program on the machine. During a session, other browsers get the full site, because the minimal versions only exist in Chromium's policy and extension. If that matters to you, do not keep another browser installed.</dd>
+      </div>
+      <div>
+        <dt>What about my phone?</dt>
+        <dd>Nothing. Calma only knows about the machine it runs on.</dd>
+      </div>
+      <div>
+        <dt>Can I remove it?</dt>
+        <dd><code>sudo calma uninstall</code> asks for the password if one is set, stops the units, removes the files and restores <code>/etc/hosts</code>, the Chromium policy and the flags file. Without the password, removing it is the deliberate multi-step root project described in the threat model.</dd>
+      </div>
+      <div>
+        <dt>Is anything sent anywhere?</dt>
+        <dd>No. There is no backend and no telemetry. The only network traffic is between the extension, the bar widget and the daemon on <code>127.0.0.1</code>. The code is short, has no dependencies, and runs as root, so read it.</dd>
+      </div>
+      <div>
+        <dt>Why does <code>systemctl stop calma</code> fail?</dt>
+        <dd>The unit is marked <code>RefuseManualStop</code>. Stopping the daemon would be the easiest loosening of all, so it is not offered.</dd>
+      </div>
+    </dl>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <p class="wordmark"><span class="mark" aria-hidden="true"></span>calma</p>
+      <p>A distraction blocker for Omarchy that is hard to argue with. MIT, no backend, loopback only.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="https://github.com/joanreyero/calma">GitHub</a>
+      <a href="https://github.com/joanreyero/calma#readme">README</a>
+      <a href="https://github.com/joanreyero/calma/blob/main/SETUP.md">Setup</a>
+      <a href="https://github.com/joanreyero/calma/blob/main/ARCHITECTURE.md">Architecture</a>
+      <a href="https://github.com/joanreyero/calma/blob/main/docs/threat-model.md">Threat model</a>
+      <a href="https://github.com/joanreyero/calma/blob/main/LICENSE">MIT license</a>
+    </nav>
+  </div>
+  <div class="wrap"><div class="footer-bottom">
+    <span>MIT · by <a href="https://github.com/joanreyero">Joan Reyero</a></span>
+    <a href="https://github.com/joanreyero/calma">github.com/joanreyero/calma</a>
+  </div></div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
