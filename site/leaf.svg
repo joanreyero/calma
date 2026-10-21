@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Calma: one leaf. #7aa2f7 fills the blade; the midrib is the background colour. -->
+  <g transform="translate(15 49) rotate(-45)">
+    <path d="M0 0 C9 -15 33 -17 46 0 C33 17 9 15 0 0 Z" fill="#7aa2f7"/>
+    <path d="M2 0 C16 -3 30 -3 44 0" stroke="#1a1b26" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M0 0 L-7 0" stroke="#7aa2f7" stroke-width="3.2" stroke-linecap="round"/>
+  </g>
+</svg>
