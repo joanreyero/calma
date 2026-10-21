@@ -234,7 +234,10 @@ function budgetLine(rule) {
     parts.push(`Sessions today: ${rule.sessions_used ?? 0} of ${rule.sessions_per_day}`);
   }
   if (rule.session_minutes) parts.push(`${rule.session_minutes} min each`);
-  if (typeof rule.seconds_left === "number") parts.push(`${minutesLeft(rule)} min left`);
+  // Minutes only matter while a session can still be started.
+  if (typeof rule.seconds_left === "number" && (rule.sessions_left ?? 1) > 0) {
+    parts.push(`${minutesLeft(rule)} min left`);
+  }
   return parts;
 }
 
