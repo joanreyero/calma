@@ -135,8 +135,59 @@ function barText(rules, nowMs) {
   return glyphFor(rule) + " " + formatCountdown(sessionSecondsLeft(rule, nowMs))
 }
 
-function barTooltip(rules, nowMs, reachable) {
-  if (!reachable) return "Calma isn't running"
+// The three situations the widget tells apart, from whether the daemon
+// answers and whether the CLI or /etc/calma exists (null = not probed yet).
+var SETUP_RUNNING = "running"
+var SETUP_STOPPED = "stopped"
+var SETUP_MISSING = "missing"
+var SETUP_UNKNOWN = "unknown"
+
+function setupState(reachable, installed) {
+  if (reachable) return SETUP_RUNNING
+  if (installed === false) return SETUP_MISSING
+  if (installed === true) return SETUP_STOPPED
+  return SETUP_UNKNOWN
+}
+
+function setupText(state) {
+  if (state === SETUP_MISSING) return "Calma isn't set up on this machine"
+  if (state === SETUP_STOPPED) return "Calma isn't running"
+  return ""
+}
+
+function setupHint(state) {
+  if (state === SETUP_MISSING) return "Install it with the agent, or follow SETUP.md in the plugin directory by hand."
+  if (state === SETUP_STOPPED) return "calma doctor in a terminal says which layer is down."
+  return ""
+}
+
+// What the Set up button hands to `omarchy agent prompt`; pluginDir is the
+// checkout the shell loaded this plugin from, where SETUP.md lives.
+function setupPrompt(pluginDir) {
+  var dir = String(pluginDir || "").replace(/\/$/, "") || "~/.config/omarchy/plugins/io.github.joanreyero.calma"
+  return "Set up Calma, the distraction blocker, on this machine. Read " + dir + "/SETUP.md first and follow it step by step with me: "
+    + "install it with sudo ./install.sh from that directory (I run the sudo lines in a terminal), "
+    + "talk me through the password choice, then turn what I want blocked into rules."
+}
+
+function shellQuote(value) {
+  return "'" + String(value || "").replace(/'/g, "'\\''") + "'"
+}
+
+function setupCommand(pluginDir) {
+  return "omarchy agent prompt " + shellQuote(setupPrompt(pluginDir))
+}
+
+// A local path from the file URL Qt.resolvedUrl gives, without the trailing slash.
+function pathFromUrl(url) {
+  var s = String(url || "")
+  if (s.indexOf("file://") === 0) s = s.substring(7)
+  try { s = decodeURIComponent(s) } catch (e) {}
+  return s.replace(/\/$/, "")
+}
+
+function barTooltip(rules, nowMs, reachable, state) {
+  if (!reachable) return setupText(state) || "Calma isn't running"
   var open = openRules(rules)
   if (open.length === 0) return "Calma · nothing open"
   var parts = []
@@ -214,8 +265,8 @@ function actionLabel(rule) {
   return "Start " + startMinutes(rule) + " min"
 }
 
-function heroMeta(status, rules, reachable, error) {
-  if (!reachable) return error || "Calma isn't running"
+function heroMeta(status, rules, reachable, error, state) {
+  if (!reachable) return setupText(state) || error || "Calma isn't running"
   if (rules.length === 0) return "No rules yet · calma add"
   var open = openRules(rules).length
   var text = plural(rules.length, "rule")
@@ -251,6 +302,17 @@ if (typeof module !== "undefined") {
   module.exports = {
     STATE_OPEN: STATE_OPEN,
     STATE_BLOCKED: STATE_BLOCKED,
+    SETUP_RUNNING: SETUP_RUNNING,
+    SETUP_STOPPED: SETUP_STOPPED,
+    SETUP_MISSING: SETUP_MISSING,
+    SETUP_UNKNOWN: SETUP_UNKNOWN,
+    setupState: setupState,
+    setupText: setupText,
+    setupHint: setupHint,
+    setupPrompt: setupPrompt,
+    setupCommand: setupCommand,
+    shellQuote: shellQuote,
+    pathFromUrl: pathFromUrl,
     GLYPH_CALMA: GLYPH_CALMA,
     defaultPort: defaultPort,
     baseUrl: baseUrl,

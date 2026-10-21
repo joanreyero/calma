@@ -1,10 +1,10 @@
-// Unit tests for Model.js. Run: node --test plugin/dev/
+// Unit tests for Model.js (repo root). Run: node --test dev/plugin/
 import test from "node:test"
 import assert from "node:assert/strict"
 import { createRequire } from "node:module"
 
 const require = createRequire(import.meta.url)
-const Model = require("../Model.js")
+const Model = require("../../Model.js")
 
 const NOW = 1760969900.0
 
@@ -102,6 +102,29 @@ test("heroMeta summarises the day", () => {
   assert.equal(Model.heroMeta(f, [], true, ""), "No rules yet · calma add")
   assert.equal(Model.heroMeta(null, [], false, ""), "Calma isn't running")
   assert.equal(Model.heroMeta(null, [], false, "boom"), "boom")
+  assert.equal(Model.heroMeta(null, [], false, "boom", Model.SETUP_MISSING), "Calma isn't set up on this machine")
+  assert.equal(Model.heroMeta(null, [], false, "boom", Model.SETUP_STOPPED), "Calma isn't running")
+})
+
+test("setupState tells running, stopped, missing and unknown apart", () => {
+  assert.equal(Model.setupState(true, null), Model.SETUP_RUNNING)
+  assert.equal(Model.setupState(true, false), Model.SETUP_RUNNING)
+  assert.equal(Model.setupState(false, true), Model.SETUP_STOPPED)
+  assert.equal(Model.setupState(false, false), Model.SETUP_MISSING)
+  assert.equal(Model.setupState(false, null), Model.SETUP_UNKNOWN)
+  assert.equal(Model.setupText(Model.SETUP_UNKNOWN), "")
+  assert.equal(Model.barTooltip([], NOW * 1000, false, Model.SETUP_MISSING), "Calma isn't set up on this machine")
+})
+
+test("setupCommand hands SETUP.md in the plugin dir to the agent, shell-quoted", () => {
+  assert.equal(Model.pathFromUrl("file:///home/j/.config/omarchy/plugins/io.github.joanreyero.calma/"), "/home/j/.config/omarchy/plugins/io.github.joanreyero.calma")
+  assert.equal(Model.pathFromUrl("file:///home/j/My%20Dir/"), "/home/j/My Dir")
+  const cmd = Model.setupCommand("/home/j/it's here")
+  assert.ok(cmd.startsWith("omarchy agent prompt '"))
+  assert.ok(cmd.includes("Read /home/j/it'\\''s here/SETUP.md first"))
+  assert.ok(cmd.includes("sudo ./install.sh from that directory"))
+  assert.ok(cmd.endsWith("rules.'"))
+  assert.equal(Model.shellQuote("a'b"), "'a'\\''b'")
 })
 
 test("withRule replaces one rule without mutating the original", () => {

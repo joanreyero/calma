@@ -1,11 +1,11 @@
 import QtQuick
 import QtTest
-import ".."
-import "../Model.js" as Model
+import "../.."
+import "../../Model.js" as Model
 import "TestPort.js" as TestPort
 
-// Drives Service.qml against dev/mock-daemon.py (started by dev/run on the
-// port in TestPort.js) with the real XMLHttpRequest, so the poll, the long-poll
+// Drives Service.qml (repo root) against mock-daemon.py (started by dev/plugin/run
+// on the port in TestPort.js) with the real XMLHttpRequest, so the poll, the long-poll
 // and the POSTs with the X-Calma header are exercised end to end, headless.
 TestCase {
   name: "CalmaService"
@@ -21,7 +21,7 @@ TestCase {
   }
 
   function init() {
-    service = serviceComponent.createObject(this, { settings: { port: port } })
+    service = serviceComponent.createObject(this, { settings: { port: port }, probeEnabled: false })
     verify(service !== null)
   }
 
@@ -86,7 +86,7 @@ TestCase {
     waitUntil(function() { return service.status !== null })
     // A second client ends x; this one must learn it through /events well
     // before its own 5 s poll would.
-    var other = serviceComponent.createObject(this, { settings: { port: port } })
+    var other = serviceComponent.createObject(this, { settings: { port: port }, probeEnabled: false })
     waitUntil(function() { return other.status !== null })
     var openBefore = service.rule("x").state === "open"
     if (openBefore) other.close("x")
@@ -101,7 +101,7 @@ TestCase {
   // a /status and a long-poll in flight must abort them quietly.
   function test_destroy_mid_request_is_silent() {
     failOnWarning(/.*/)
-    var doomed = serviceComponent.createObject(this, { settings: { port: port } })
+    var doomed = serviceComponent.createObject(this, { settings: { port: port }, probeEnabled: false })
     waitUntil(function() { return doomed.status !== null })
     doomed.refresh()
     verify(doomed.refreshing)
@@ -117,5 +117,33 @@ TestCase {
     service.settings = { port: port }
     waitUntil(function() { return service.lastError === "" && service.status !== null }, 6000)
     verify(service.reachable)
+  }
+
+  // The three setup states, with the probe's answer injected: a reachable
+  // daemon means running whatever the probe said; unreachable splits on it.
+  function test_setup_states() {
+    waitUntil(function() { return service.status !== null })
+    compare(service.setupState, Model.SETUP_RUNNING)
+    verify(service.installed === true)
+    verify(service.pluginDir.length > 0 && service.pluginDir.indexOf("file:") === -1)
+    verify(service.setupCommand.indexOf("omarchy agent prompt '") === 0)
+    verify(service.setupCommand.indexOf(service.pluginDir + "/SETUP.md") !== -1)
+
+    service.settings = { port: 1 }
+    waitUntil(function() { return !service.reachable }, 6000)
+    compare(service.setupState, Model.SETUP_STOPPED)
+    compare(service.barTooltip, "Calma isn't running")
+
+    service.installed = false
+    compare(service.setupState, Model.SETUP_MISSING)
+    compare(service.barTooltip, "Calma isn't set up on this machine")
+
+    service.installed = null
+    compare(service.setupState, Model.SETUP_UNKNOWN)
+
+    service.settings = { port: port }
+    waitUntil(function() { return service.reachable }, 6000)
+    compare(service.setupState, Model.SETUP_RUNNING)
+    verify(service.installed === true)
   }
 }

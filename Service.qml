@@ -9,7 +9,8 @@ import "Model.js" as Model
 // Talks to calmad over loopback with XMLHttpRequest: GET /status every
 // pollIntervalMs, GET /events as a long-poll so a session ending shows within
 // milliseconds, POST /open and /close with the X-Calma header the daemon
-// requires on every POST.
+// requires on every POST. While the daemon doesn't answer, InstallProbe.qml
+// tells apart "installed but stopped" from "not set up" (see setupState).
 Item {
   id: root
 
@@ -41,7 +42,24 @@ Item {
   readonly property string baseUrl: Model.baseUrl(setting("port", Model.defaultPort))
 
   readonly property string barText: Model.barText(rules, nowMs)
-  readonly property string barTooltip: Model.barTooltip(rules, nowMs, reachable)
+  readonly property string barTooltip: Model.barTooltip(rules, nowMs, reachable, setupState)
+
+  // Is Calma installed at all? null until the first probe answers, then
+  // whether /usr/bin/calma or /etc/calma exists. A reachable daemon settles
+  // it without a probe. Re-checked every probeIntervalMs while unreachable.
+  property var installed: null
+  // Whether omarchy-launch-terminal exists, from the same probe.
+  property bool hasTerminal: false
+  readonly property bool probed: installed !== null
+  readonly property string setupState: Model.setupState(reachable, installed)
+  readonly property int probeIntervalMs: 30000
+  // Tests flip this off: the probe would otherwise report the real machine.
+  property bool probeEnabled: true
+  // The directory the shell loaded this plugin from; SETUP.md lives there.
+  readonly property string pluginDir: Model.pathFromUrl(Qt.resolvedUrl("."))
+  readonly property string setupCommand: Model.setupCommand(pluginDir)
+  property var probe: null
+  property bool probeUnavailable: false
 
   function setting(name, fallback) {
     var value = settings ? settings[name] : undefined
@@ -84,6 +102,30 @@ Item {
     lastError = ""
     lastUpdatedMs = Date.now()
     nowMs = Date.now()
+    installed = true
+  }
+
+  // InstallProbe.qml needs Quickshell.Io, which only loads inside Quickshell;
+  // created at runtime so plain Qt (the QtTest harness) runs without it.
+  function probeInstall() {
+    if (!active || !probeEnabled || reachable || probeUnavailable) return
+    if (probe === null) {
+      var component = Qt.createComponent(Qt.resolvedUrl("InstallProbe.qml"))
+      if (component.status !== Component.Ready) {
+        probeUnavailable = true
+        return
+      }
+      probe = component.createObject(root)
+      if (probe === null) {
+        probeUnavailable = true
+        return
+      }
+      probe.finished.connect(function(found, terminal) {
+        root.installed = found === true
+        root.hasTerminal = terminal === true
+      })
+    }
+    probe.check()
   }
 
   function fail(message) {
@@ -124,6 +166,15 @@ Item {
     repeat: true
     running: root.active && root.hasOpenSession
     onTriggered: root.nowMs = Date.now()
+  }
+
+  Timer {
+    id: probeTimer
+    interval: root.probeIntervalMs
+    repeat: true
+    running: root.active && root.probeEnabled && !root.reachable
+    triggeredOnStart: true
+    onTriggered: root.probeInstall()
   }
 
   Timer {

@@ -8,6 +8,7 @@ import socket
 import pytest
 
 from calma import paths
+from calma.enforce import procs
 
 EXAMPLE_RULES = {
     "version": 1,
@@ -46,6 +47,10 @@ def calma_root(tmp_path, monkeypatch):
         sock.bind(("127.0.0.1", 0))
         monkeypatch.setenv("CALMA_PORT", str(sock.getsockname()[1]))
     paths.ensure_dirs()
+    # The self-check looks at the real process table; a Chromium running on
+    # the developer's desktop must not make the daemon report a problem here.
+    # Tests about that check set their own stand-in.
+    monkeypatch.setattr(procs, "chromium_running", lambda: False)
     return tmp_path
 
 

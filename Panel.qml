@@ -36,9 +36,12 @@ Panel {
   readonly property var rules: root.service ? root.service.rules : []
   readonly property bool hasOpenSession: root.service ? root.service.hasOpenSession : false
   readonly property bool reachable: root.service ? root.service.reachable : false
+  readonly property string setupState: root.service ? root.service.setupState : Model.SETUP_UNKNOWN
+  readonly property bool notInstalled: setupState === Model.SETUP_MISSING
+  readonly property bool notRunning: setupState === Model.SETUP_STOPPED
   readonly property string heroMetaText: service && service.actionStatus !== ""
     ? service.actionStatus
-    : Model.heroMeta(root.service ? root.service.status : null, rules, reachable, root.service ? root.service.lastError : "")
+    : Model.heroMeta(root.service ? root.service.status : null, rules, reachable, root.service ? root.service.lastError : "", setupState)
   readonly property var problems: Model.problems(root.service ? root.service.status : null)
 
   // The shell injects settings into widgets, not services: push them across.
@@ -82,9 +85,23 @@ Panel {
     for (var i = 0; i < open.length; i++) service.close(open[i].name)
   }
 
+  // Hands SETUP.md in this plugin's directory to the default agent, in a terminal.
+  function launchSetup() {
+    if (!bar || !service) return
+    bar.run(service.setupCommand)
+    close()
+  }
+
+  function openTerminal() {
+    if (!bar) return
+    bar.run("omarchy-launch-terminal")
+    close()
+  }
+
+  // Not set up: always visible, so the button that installs it can be found.
   // Stays while its panel is open: a session ending must not pull the anchor
   // out from under the dropdown.
-  visible: !hideWhenIdle || hasOpenSession || opened
+  visible: !hideWhenIdle || hasOpenSession || opened || notInstalled
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
@@ -127,6 +144,8 @@ Panel {
         barText: root.service ? root.service.barText : "",
         visible: root.visible,
         hideWhenIdle: root.hideWhenIdle,
+        setup: root.setupState,
+        pluginDir: root.service ? root.service.pluginDir : "",
         error: root.service ? root.service.lastError : ""
       })
     }
@@ -239,6 +258,68 @@ Panel {
             foreground: root.foreground
           }
 
+          // Not set up, or installed but the daemon doesn't answer.
+          Column {
+            visible: root.notInstalled || root.notRunning
+            width: parent.width
+            spacing: Style.space(8)
+            topPadding: Style.space(12)
+            bottomPadding: Style.space(12)
+
+            Text {
+              textFormat: Text.PlainText
+              width: parent.width
+              text: Model.setupText(root.setupState)
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.body
+              horizontalAlignment: Text.AlignHCenter
+              wrapMode: Text.WordWrap
+            }
+
+            Text {
+              textFormat: Text.PlainText
+              width: parent.width
+              text: Model.setupHint(root.setupState)
+              color: root.dim
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              horizontalAlignment: Text.AlignHCenter
+              wrapMode: Text.WordWrap
+            }
+
+            Button {
+              visible: root.notInstalled
+              anchors.horizontalCenter: parent.horizontalCenter
+              text: "Set up with the agent"
+              bordered: true
+              selected: true
+              foreground: root.foreground
+              background: Color.popups.background
+              accent: Color.accent
+              fontFamily: root.fontFamily
+              fontSize: Style.font.body
+              horizontalPadding: Style.spacing.controlPaddingX
+              verticalPadding: Style.spacing.controlPaddingY
+              onClicked: root.launchSetup()
+            }
+
+            Button {
+              visible: root.notRunning && root.service && root.service.hasTerminal
+              anchors.horizontalCenter: parent.horizontalCenter
+              text: "Open a terminal"
+              bordered: true
+              foreground: root.foreground
+              background: Color.popups.background
+              accent: Color.accent
+              fontFamily: root.fontFamily
+              fontSize: Style.font.bodySmall
+              horizontalPadding: Style.spacing.controlPaddingX
+              verticalPadding: Style.space(3)
+              onClicked: root.openTerminal()
+            }
+          }
+
           Column {
             visible: root.rules.length > 0
             width: parent.width
@@ -270,11 +351,11 @@ Panel {
 
           Text {
             textFormat: Text.PlainText
-            visible: root.rules.length === 0
+            visible: root.rules.length === 0 && !root.notInstalled && !root.notRunning
             width: parent.width
             text: root.reachable
               ? "No rules yet. Add one in a terminal: sudo calma add x --preset x --sessions 2 --minutes 5"
-              : "Start the Calma daemon to see your rules: sudo systemctl start calma"
+              : "Looking for Calma…"
             color: root.dim
             font.family: root.fontFamily
             font.pixelSize: Style.font.body
@@ -317,7 +398,9 @@ Panel {
           Text {
             textFormat: Text.PlainText
             width: parent.width
-            text: "calma status in a terminal · j/k move · enter acts · e ends all"
+            text: root.notInstalled
+              ? "The agent reads SETUP.md and walks you through install, password and rules"
+              : "calma status in a terminal · j/k move · enter acts · e ends all"
             color: root.dim
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption

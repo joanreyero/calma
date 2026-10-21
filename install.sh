@@ -2,8 +2,13 @@
 # Calma installer and upgrader. Idempotent: safe to run again at any time.
 #
 #   sudo ./install.sh            install or upgrade
-#   sudo ./install.sh --plugin   also install the Omarchy bar plugin for your user
 #   ./install.sh --destdir DIR   testing only: prefix every path with DIR, skip systemctl
+#
+# This checkout is also the Omarchy shell plugin (manifest.json at the root):
+# `omarchy plugin add https://github.com/joanreyero/calma --enable` puts it in
+# ~/.config/omarchy/plugins/io.github.joanreyero.calma, and the bar widget's
+# "Set up with the agent" button leads here. Nothing about the plugin is
+# installed by this script.
 #
 # See ARCHITECTURE.md, section "Packaging", for the contract this script follows.
 
@@ -11,17 +16,18 @@ set -euo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DESTDIR=""
-WITH_PLUGIN=0
 EXT_PATH="/usr/share/calma/extension"   # the real path; never prefixed inside config lines
-PLUGIN_ID="io.github.joanreyero.calma"
 
 usage() {
-  sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --plugin) WITH_PLUGIN=1 ;;
+    --plugin)
+      echo "install.sh: --plugin is gone; the checkout itself is the plugin:" >&2
+      echo "  omarchy plugin add https://github.com/joanreyero/calma --enable" >&2
+      exit 2 ;;
     --destdir)
       [ $# -ge 2 ] || { echo "install.sh: --destdir needs a directory" >&2; exit 2; }
       DESTDIR="${2%/}"; shift ;;
@@ -34,11 +40,7 @@ done
 
 if [ -z "$DESTDIR" ] && [ "$(id -u)" -ne 0 ]; then
   echo "Calma installs system-wide files and systemd units, so it needs root." >&2
-  if [ "$WITH_PLUGIN" -eq 1 ]; then
-    echo "Run it again as:  sudo $0 --plugin" >&2
-  else
-    echo "Run it again as:  sudo $0" >&2
-  fi
+  echo "Run it again as:  sudo $0" >&2
   exit 1
 fi
 
@@ -177,41 +179,6 @@ if [ "$UPGRADE" -eq 1 ]; then
   say "asked the running daemon to exit; systemd restarts it with the new code"
 fi
 
-# --- 7. optional: bar plugin for the invoking user -------------------------
-if [ "$WITH_PLUGIN" -eq 1 ]; then
-  step "Omarchy bar plugin"
-  if [ ! -d "$SRC/plugin" ]; then
-    say "$SRC/plugin is missing; skipping the plugin"
-  else
-    target_user="${SUDO_USER:-}"
-    if [ -z "$target_user" ] || [ "$target_user" = "root" ]; then
-      target_user="$(id -un)"
-    fi
-    target_home="$(getent passwd "$target_user" | cut -d: -f6)"
-    if [ -z "$target_home" ]; then
-      say "could not find the home directory of $target_user; skipping the plugin"
-    else
-      plugin_dir="$DESTDIR$target_home/.config/omarchy/plugins/$PLUGIN_ID"
-      install -d -m 0755 "$plugin_dir"
-      if command -v rsync >/dev/null 2>&1; then
-        rsync -a --delete "$SRC/plugin/" "$plugin_dir/"
-      else
-        rm -rf "$plugin_dir"
-        cp -a "$SRC/plugin" "$plugin_dir"
-      fi
-      if [ -z "$DESTDIR" ] && [ "$(id -un)" != "$target_user" ]; then
-        chown -R "$target_user:" "$DESTDIR$target_home/.config/omarchy/plugins"
-      fi
-      say "$plugin_dir/"
-      say ""
-      say "Calma never edits shell.json for you. Add this to bar.layout.right in"
-      say "$target_home/.config/omarchy/shell.json:"
-      say ""
-      say "    {\"id\": \"$PLUGIN_ID\"}"
-    fi
-  fi
-fi
-
 # --- done -------------------------------------------------------------------
 step "Done."
 cat <<EOF
@@ -230,6 +197,10 @@ Next steps:
   3. Restart Chromium so it picks up the policy and loads the extension.
 
   Then: calma status, calma open x, calma doctor.
+
+  Bar widget: if this checkout came from \`omarchy plugin add\`, the widget
+  is already in place; otherwise run
+    omarchy plugin add https://github.com/joanreyero/calma --enable
 EOF
 if [ -n "$DESTDIR" ]; then
   echo

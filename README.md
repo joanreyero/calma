@@ -23,10 +23,20 @@ only get a minimal version of the site, without feeds, Shorts or recommendations
 
 ## Quickstart
 
+The repository is an Omarchy shell plugin, so the bar widget comes first and installs the
+rest for you:
+
+1. `omarchy plugin add https://github.com/joanreyero/calma --enable`
+2. Click the Calma leaf in the bar → **Set up with the agent**. Your default coding agent
+   opens with [SETUP.md](SETUP.md) and walks you through the install (you run the `sudo`
+   lines), the password choice and your first rules. Prefer to do it by hand? Follow
+   [SETUP.md](SETUP.md) yourself.
+
+The manual path, from the plugin directory or any clone:
+
 ```sh
-git clone https://github.com/joanreyero/calma
-cd calma
-sudo ./install.sh                 # add --plugin for the Omarchy bar widget
+cd ~/.config/omarchy/plugins/io.github.joanreyero.calma   # or: git clone https://github.com/joanreyero/calma && cd calma
+sudo ./install.sh
 sudo calma password               # optional, but recommended: see "The model"
 sudo calma add x --preset x --sessions 2 --minutes 5
 ```
@@ -41,6 +51,30 @@ calma doctor          # check that every layer is in place
 ```
 
 Opening a session also works from the blocked page Chromium shows, and from the bar widget.
+
+## Bar widget
+
+The checkout is the plugin: `manifest.json`, `Panel.qml`, `Service.qml`, `InstallProbe.qml`
+and `Model.js` at the root, id `io.github.joanreyero.calma`. `omarchy plugin add` clones it
+into `~/.config/omarchy/plugins/` and `--enable` puts it in the right section of the bar.
+
+- With a session open it shows the rule's glyph and the countdown (`𝕏 4:32`). Idle, it hides
+  unless the `hideWhenIdle` setting is off. Click for a dropdown listing every rule with its
+  state, today's sessions and minutes left, and a **Start N min** / **End now** button. Right
+  click ends every open session; middle click refreshes.
+- Keyboard: `j`/`k` move, `enter` acts, `e` ends all, `r` refreshes.
+- Not installed yet: the widget is always visible, the leaf dimmed, and the dropdown offers
+  **Set up with the agent**. Installed but the daemon doesn't answer: "Calma isn't running",
+  with `calma doctor` as the hint and an **Open a terminal** button.
+- Settings (in the widget's `shell.json` entry): `hideWhenIdle` (default true) and `port`
+  (default 7390, matching `CALMA_PORT`).
+- IPC: `omarchy-shell calma status` (also `refresh`, `start <rule>`, `end [rule]`, `toggle`).
+
+One `Service.qml` per shell polls `/status` every 5 s and long-polls `/events`, so a session
+ending shows within milliseconds. Colours come from the shell theme. Development checks live
+in `dev/plugin/` (`./dev/plugin/run`: ruff, node tests for `Model.js`, qmllint, and
+`Service.qml` against a mock daemon under QtTest); `omarchy plugin validate .` checks the
+manifest.
 
 ## CLI reference
 
@@ -135,7 +169,7 @@ other Chromium flags and other `--load-extension` paths are left alone.
 
 The design, file layout, HTTP API and the rules for what counts as loosening are in
 [ARCHITECTURE.md](ARCHITECTURE.md). In short: a Python daemon (stdlib only) running as root
-enforces the rules and serves a loopback HTTP API; a Chromium MV3 extension and an Omarchy bar
-plugin talk to that API; the `calma` CLI edits the rules file, which the daemon only accepts when
+enforces the rules and serves a loopback HTTP API; a Chromium MV3 extension and the Omarchy bar
+plugin (this repository, at the root) talk to that API; the `calma` CLI edits the rules file, which the daemon only accepts when
 the change is not a loosening or carries a valid signature. Contributions: see
 [CONTRIBUTING.md](CONTRIBUTING.md). License: MIT.

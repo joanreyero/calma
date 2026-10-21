@@ -1,7 +1,8 @@
 # Contributing to Calma
 
 Thanks for taking a look. Calma is small on purpose: a stdlib-only Python daemon and CLI, a
-plain-JS Chromium extension, a QML bar plugin and a shell installer. Read
+plain-JS Chromium extension, a QML bar plugin (the repository root is the Omarchy plugin;
+its checks live in `dev/plugin/`) and a shell installer. Read
 [ARCHITECTURE.md](ARCHITECTURE.md) first; it is the contract every part follows. If you find
 it wrong or ambiguous, fix the document in the same change.
 
@@ -12,6 +13,8 @@ uvx pytest          # Python tests under tests/
 uvx ruff check      # lint
 bash -n install.sh && uvx --from shellcheck-py shellcheck install.sh
 systemd-analyze verify packaging/*.service packaging/*.timer
+./dev/plugin/run    # bar plugin: ruff, node tests, qmllint, Service.qml under QtTest
+omarchy plugin validate .
 ```
 
 The tests run with `CALMA_ROOT` pointing at a temporary directory, so they never touch the

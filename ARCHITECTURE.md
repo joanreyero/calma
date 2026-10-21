@@ -37,7 +37,17 @@ daemon's own trust store). The README and `calma doctor` must say this plainly. 
 
 ## Components and layout (public repo)
 
+The repository root is the Omarchy shell plugin: `omarchy plugin add <url>` clones it into
+`~/.config/omarchy/plugins/<id>` and needs `manifest.json` at the root, so the QML lives there
+and everything else sits beside it (the omapods plugin ships its daemon the same way).
+
 ```
+manifest.json              Omarchy plugin manifest, id io.github.joanreyero.calma, kinds service + bar-widget
+Panel.qml                  The bar widget and its dropdown (entryPoints.barWidget)
+Service.qml                One per shell: polls /status, long-polls /events, POSTs /open and /close (entryPoints.service)
+InstallProbe.qml           Quickshell Process: is Calma installed (/usr/bin/calma or /etc/calma)? Created at runtime by Service.qml
+Model.js                   Pure parsing/formatting shared by the QML and the node tests
+SETUP.md                   What the agent reads when the widget's "Set up with the agent" is clicked; the manual walkthrough too
 calma/                     Python 3.12+ package, stdlib only (no pip deps). Daemon + CLI.
   __init__.py              __version__
   __main__.py              `python -m calma` → cli.main()
@@ -57,14 +67,14 @@ calma/                     Python 3.12+ package, stdlib only (no pip deps). Daem
 bin/calma                  Entry point: exec python3 -m calma "$@" (PYTHONPATH=/usr/lib/calma)
 bin/calmad                 Entry point for the daemon: python3 -m calma.daemon
 extension/                 Chromium MV3 extension (plain JS, no build step)
-plugin/                    Omarchy bar plugin (Quickshell QML), id io.github.joanreyero.calma
 packaging/
   calma.service            systemd system unit for the daemon
   calma-watchdog.service   oneshot repair unit
   calma-watchdog.timer     every minute
   chromium-flags.conf      the line installed to /etc/chromium-flags.conf
-install.sh                 idempotent root installer (also used for upgrades)
+install.sh                 idempotent root installer (also used for upgrades); knows nothing about the plugin
 tests/                     pytest for the Python package (run with CALMA_ROOT in a tmp dir)
+dev/plugin/                plugin checks: `run` (ruff, node tests, qmllint, Service.qml under QtTest), mock-daemon.py, TestPort.js
 docs/threat-model.md       what Calma does and does not protect against
 README.md, LICENSE (MIT)
 ```
@@ -468,20 +478,35 @@ the Omarchy terminal theme applies). Commands:
 - Everything degrades safely: if the daemon is unreachable, blocked pages still show (fail
   closed) and content scripts keep their cosmetic rules on.
 
-## Bar plugin (`plugin/`, Omarchy shell, Quickshell QML)
+## Bar plugin (repository root, Omarchy shell, Quickshell QML)
 
-- Study `/usr/share/omarchy/docs/` (bar, panels, services), the built-in plugins in
+- Study `/usr/share/omarchy/shell/` (Ui, Commons, services, plugins), the built-in plugins in
   `/usr/share/omarchy/shell/plugins/` and the installed `~/.config/omarchy/plugins/37signals.hey`
-  before writing anything; follow the `manifest.json` schema used there.
-- Id `io.github.joanreyero.calma`, kinds `["bar-widget"]`, a `Service.qml` that polls
-  `GET /status` every 5 s (and `/events` if feasible) and a `Panel.qml` widget: hidden when no
+  before writing anything; follow the `manifest.json` schema used there and keep
+  `omarchy plugin validate .` passing (no symlinks inside the repo, relative entry points).
+- Id `io.github.joanreyero.calma`, kinds `["service", "bar-widget"]`. `Service.qml` is
+  instantiated once per shell and polls `GET /status` every 5 s plus `GET /events` as a
+  long-poll; `Panel.qml` (one per bar) reads it and pushes its settings in. Hidden when no
   session is open and setting `hideWhenIdle` is true (default true); otherwise shows the rule
   glyph and `m:ss`. Click → a dropdown listing every rule: state, `1/2 · 7 min left`, and a
   button "Start 5 min" / "End now". Colours from the shell theme, never hard-coded.
-- Installed by copying/symlinking `plugin/` to `~/.config/omarchy/plugins/io.github.joanreyero.calma`
-  and adding `{"id": "io.github.joanreyero.calma"}` to `bar.layout.right` in `~/.config/omarchy/shell.json`
-  (`install.sh` offers this with `--plugin` for the invoking user; never edits shell.json
-  without being asked).
+- Three states, `Service.setupState`: `running` (daemon answers), `stopped` (unreachable but
+  `/usr/bin/calma` or `/etc/calma` exists → "Calma isn't running", hint `calma doctor`, an
+  "Open a terminal" button when `omarchy-launch-terminal` exists), `missing` (neither exists →
+  the widget is always visible, the leaf dimmed, "Calma isn't set up on this machine" and one
+  primary button **Set up with the agent**). The check is `InstallProbe.qml`, a one-shot
+  `test -e`, re-run every 30 s while the daemon is unreachable; it needs Quickshell.Io, so
+  `Service.qml` creates it at runtime and the QtTest harness runs without it (`probeEnabled`).
+- "Set up with the agent" runs, through `bar.run`, `omarchy agent prompt '<prompt>'` where the
+  prompt asks the agent to read `<plugin dir>/SETUP.md` and follow it with the person (install
+  with `sudo ./install.sh` from that directory, the password choice, then rules). The plugin
+  dir is `Qt.resolvedUrl(".")` with `file://` stripped (`Model.pathFromUrl`), shell-quoted
+  (`Model.setupCommand`).
+- Installed by `omarchy plugin add https://github.com/joanreyero/calma --enable`, which clones
+  the repo to `~/.config/omarchy/plugins/io.github.joanreyero.calma` and adds
+  `{"id": "io.github.joanreyero.calma"}` to `bar.layout.<defaultSection>` in
+  `~/.config/omarchy/shell.json`. `install.sh` never touches the plugin or shell.json; SETUP.md
+  tells the person to run it from the plugin directory.
 
 ## Packaging (`install.sh`, `packaging/`)
 
@@ -491,7 +516,7 @@ the Omarchy terminal theme applies). Commands:
   a default empty rules file if missing (never overwrites an existing one); `systemctl daemon-reload`,
   `enable --now calma.service calma-watchdog.timer`; prints next steps (`sudo calma password`,
   `sudo calma add x --preset x --sessions 2 --minutes 5`, restart Chromium). Idempotent, safe to
-  re-run for upgrades. `RefuseManualStop=yes` also refuses `systemctl restart`, so an upgrade
+  re-run for upgrades; it knows nothing about the bar plugin. `RefuseManualStop=yes` also refuses `systemctl restart`, so an upgrade
   sends `systemctl kill -s SIGTERM calma.service` after copying the files and `Restart=always`
   brings the new code up within a second.
 - `calma.service`: `Type=simple`, `ExecStart=/usr/lib/calma/calmad`, `Restart=always`,

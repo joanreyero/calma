@@ -6,7 +6,12 @@ session open, `youtube` is blocked and can be opened, `steam` has no sessions
 left today. /open and /close change the in-memory state like the daemon
 would (budgets, cooldown, expiry) so the plugin can be exercised end to end.
 
-    python3 plugin/dev/mock-daemon.py [port]      # default 7390
+    python3 dev/plugin/mock-daemon.py [port] [events-timeout-seconds]   # 7390, 25
+
+The second argument shortens the /events long-poll. Qt keeps an aborted
+request's socket until the server answers, and allows six per host, so a
+test that aborts many long-polls (hot-reloads, port changes) stalls behind
+them unless they return quickly; dev/plugin/run passes 2.
 
 Loopback only, stdlib only. Not for production use.
 """
@@ -234,7 +239,11 @@ class State:
                 self._end(name, now)
             return 200, {"ok": True, "rule": self.rule_view(name, now)}
 
-    def wait_for_change(self, since: float, timeout: float = 25.0) -> bool:
+    events_timeout: float = 25.0
+
+    def wait_for_change(self, since: float, timeout: float | None = None) -> bool:
+        if timeout is None:
+            timeout = self.events_timeout
         with self.lock:
             if self.last_change > since:
                 return True
@@ -354,6 +363,8 @@ class Handler(BaseHTTPRequestHandler):
 
 def main(argv: list[str]) -> int:
     port = int(argv[1]) if len(argv) > 1 else 7390
+    if len(argv) > 2:
+        STATE.events_timeout = float(argv[2])
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     server.daemon_threads = True
     sys.stderr.write(f"mock-daemon: calma {VERSION} listening on http://127.0.0.1:{port}\n")

@@ -22,15 +22,21 @@ clipboard with `wl-copy`). Never ask for, store or type their Calma password.
 
 ## 1. Install (person, in a terminal)
 
+The Calma repository is itself the Omarchy shell plugin, so the plugin directory is the
+checkout to install from. If the bar widget is already there (that's where "Set up with the
+agent" lives), skip the first line.
+
 ```sh
-git clone https://github.com/joanreyero/calma ~/Work/personal/calma   # any path
-cd ~/Work/personal/calma && sudo ./install.sh --plugin
+omarchy plugin add https://github.com/joanreyero/calma --enable
+cd ~/.config/omarchy/plugins/io.github.joanreyero.calma && sudo ./install.sh
 ```
 
 `install.sh` is idempotent (re-run it to upgrade). It installs the daemon (`calma.service`,
 refuses `systemctl stop`, restarts itself in a second), the watchdog timer, the Chromium
-policy, the extension (`/usr/share/calma/extension`, loaded through `/etc/chromium-flags.conf`),
-the bar plugin (with `--plugin`) and links this skill into `~/.agents/skills/`.
+policy and the extension (`/usr/share/calma/extension`, loaded through
+`/etc/chromium-flags.conf`). The bar widget needs nothing more: `omarchy plugin add --enable`
+already put it in the bar, and it switches from "Calma isn't set up" to the live view as soon
+as the daemon answers.
 
 ## 2. Password (person, same terminal)
 
@@ -65,8 +71,9 @@ needs the old one.
 
 - **Quit Chromium fully and reopen it** once, so it loads the policy and the extension. Omarchy
   web apps (WhatsApp, etc.) are Chromium too and pick it up the same way.
-- Bar widget: `install.sh --plugin` copies the plugin; add `{"id": "io.github.joanreyero.calma"}`
-  to `bar.layout.right` in `~/.config/omarchy/shell.json` (you may do this; it hot-reloads).
+- Bar widget: it's in the bar already if the plugin was added with `--enable`; otherwise
+  `omarchy plugin enable io.github.joanreyero.calma` (or add `{"id": "io.github.joanreyero.calma"}`
+  to `bar.layout.right` in `~/.config/omarchy/shell.json`; you may do this, it hot-reloads).
   It hides when no session is open; click it for every rule and a Start/End button.
 
 ## 5. Verify
@@ -97,4 +104,7 @@ widget, then `calma close x`: the tab returns to the blocked page within a secon
   (needs the extension loaded, i.e. a Chromium restart after install).
 - A notification "Calma: rules were changed without the password": the daemon kept the
   previous rules and restored the file. Nothing to do; `calma log` shows what was attempted.
-- Upgrading: `git pull && sudo ./install.sh` in the checkout.
+- The widget says "Calma isn't running" although it's installed: `calma doctor`, then
+  `calma log` for the daemon's last lines; the watchdog timer restarts it within a minute.
+- Upgrading: `omarchy plugin update io.github.joanreyero.calma` (or `git pull` in the plugin
+  directory), then `sudo ./install.sh` there.
