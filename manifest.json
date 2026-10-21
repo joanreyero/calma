@@ -5,7 +5,7 @@
   "version": "0.1.0",
   "author": "Joan Reyero",
   "license": "MIT",
-  "description": "Calma in the Omarchy bar: the running session's countdown, every rule's state and budget, and a button to start or end a session.",
+  "description": "A distraction blocker that is hard to argue with. Daily session budgets for X, YouTube and anything else; blocked system-wide outside sessions, minimal versions inside; loosening needs a password you can give away. The bar widget shows the countdown and starts or ends sessions.",
   "kinds": [
     "service",
     "bar-widget"
