@@ -57,7 +57,7 @@ sysctl() {
 }
 
 # --- sanity: are we in a Calma checkout? -----------------------------------
-for required in calma bin/calma bin/calmad extension packaging/calma.service \
+for required in calma bin/calma bin/calmad chromium/extension packaging/calma.service \
                 packaging/calma-watchdog.service packaging/calma-watchdog.timer; do
   if [ ! -e "$SRC/$required" ]; then
     echo "install.sh: $SRC/$required is missing; run this from a complete Calma checkout." >&2
@@ -115,7 +115,7 @@ say "$LIB/calmad"
 
 # --- 2. extension -------------------------------------------------------------
 step "Chromium extension"
-sync_tree "$SRC/extension" "$SHARE_EXT"
+sync_tree "$SRC/chromium/extension" "$SHARE_EXT"
 say "$SHARE_EXT/"
 
 # --- 3. systemd units ---------------------------------------------------------

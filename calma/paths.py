@@ -112,15 +112,15 @@ def share_dir() -> Path:
 
 
 def source_extension_dir() -> Path | None:
-    """The `extension/` directory of a source checkout (sibling of the package), when running from one."""
-    candidate = Path(__file__).resolve().parent.parent / "extension"
+    """The `chromium/extension/` directory of a source checkout (sibling of the package), when running from one."""
+    candidate = Path(__file__).resolve().parent.parent / "chromium" / "extension"
     return candidate if (candidate / "manifest.json").is_file() else None
 
 
 def extension_dir() -> Path:
     """Where the unpacked extension lives.
 
-    Installed: /usr/share/calma/extension. Dev mode: the checkout's own `extension/` directory when there
+    Installed: /usr/share/calma/extension. Dev mode: the checkout's own `chromium/extension/` directory when there
     is one (the only thing a Chromium started by hand could load), else the prefixed path.
     """
     if dev_mode():

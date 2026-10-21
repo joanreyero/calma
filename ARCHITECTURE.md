@@ -66,7 +66,7 @@ calma/                     Python 3.12+ package, stdlib only (no pip deps). Daem
   paths.py                 All filesystem paths; honours CALMA_ROOT (dev mode)
 bin/calma                  Entry point: exec python3 -m calma "$@" (PYTHONPATH=/usr/lib/calma)
 bin/calmad                 Entry point for the daemon: python3 -m calma.daemon
-extension/                 Chromium MV3 extension (plain JS, no build step)
+chromium/extension/        Chromium MV3 extension (one level down: the marketplace validator treats any `*/manifest.json` as a plugin) (plain JS, no build step)
 packaging/
   calma.service            systemd system unit for the daemon
   calma-watchdog.service   oneshot repair unit
@@ -431,7 +431,7 @@ the Omarchy terminal theme applies). Commands:
   repaired.
 - Logging to stderr (journald). No log files.
 
-## Extension (`extension/`, MV3, plain JS)
+## Extension (`chromium/extension/`, MV3, plain JS)
 
 - `manifest.json`: `permissions: ["tabs", "webNavigation", "declarativeNetRequest", "alarms", "storage"]`,
   `host_permissions: ["http://127.0.0.1:7390/*", "*://*.x.com/*", "*://*.twitter.com/*", "*://*.youtube.com/*", "*://youtu.be/*", "*://*.youtube-nocookie.com/*", "<all_urls>"]` (all_urls is needed to redirect arbitrary custom domains; keep the explicit list for clarity), `web_accessible_resources: [blocked.html]`.

@@ -46,7 +46,7 @@ prefixes every path and skips `systemctl`.
 With a dev daemon running on `127.0.0.1:7390`:
 
 1. Open `chrome://extensions` in Chromium, turn on Developer mode.
-2. Load unpacked, pick the `extension/` directory of your checkout.
+2. Load unpacked, pick the `chromium/extension/` directory of your checkout.
 3. Reload the extension after editing files; the service worker's console is behind the
    "service worker" link on the card.
 

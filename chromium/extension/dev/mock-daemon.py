@@ -6,9 +6,9 @@ with fixture data: rule ``x`` open (a 5-minute session running), rule ``youtube`
 and openable, rule ``steam`` blocked with no sessions left. ``POST /open`` and
 ``POST /close`` mutate the fixture so the blocked page round-trip can be tested.
 
-    python3 extension/dev/mock-daemon.py 7390
-    python3 extension/dev/mock-daemon.py 7390 --theme light   # light fallback palette
-    python3 extension/dev/mock-daemon.py 7390 --all-blocked   # no session running
+    python3 chromium/extension/dev/mock-daemon.py 7390
+    python3 chromium/extension/dev/mock-daemon.py 7390 --theme light   # light fallback palette
+    python3 chromium/extension/dev/mock-daemon.py 7390 --all-blocked   # no session running
 
 Stdlib only.
 """

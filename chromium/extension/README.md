@@ -50,9 +50,9 @@ still applies underneath.
 ## Developing
 
 ```sh
-python3 extension/dev/mock-daemon.py 7390            # x open, youtube blocked, steam exhausted
-python3 extension/dev/mock-daemon.py 7390 --theme light
-python3 extension/dev/mock-daemon.py 7390 --all-blocked --cooldown 10
+python3 chromium/extension/dev/mock-daemon.py 7390            # x open, youtube blocked, steam exhausted
+python3 chromium/extension/dev/mock-daemon.py 7390 --theme light
+python3 chromium/extension/dev/mock-daemon.py 7390 --all-blocked --cooldown 10
 
 chromium --user-data-dir=/tmp/calma-ext-dev --load-extension="$PWD/extension" https://www.youtube.com/
 ```
@@ -60,5 +60,5 @@ chromium --user-data-dir=/tmp/calma-ext-dev --load-extension="$PWD/extension" ht
 `blocked.html` also works opened as a plain file (`blocked.html?rule=youtube`): outside the
 extension it talks to the daemon on `127.0.0.1:7390` directly, which makes design work easy.
 
-Checks: `node --check extension/background.js extension/blocked.js extension/content/*.js`
-and `python3 -c 'import json; json.load(open("extension/manifest.json"))'`.
+Checks: `node --check chromium/chromium/extension/background.js chromium/extension/blocked.js chromium/extension/content/*.js`
+and `python3 -c 'import json; json.load(open("chromium/extension/manifest.json"))'`.
