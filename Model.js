@@ -166,8 +166,8 @@ function setupHint(state) {
 function setupPrompt(pluginDir) {
   var dir = String(pluginDir || "").replace(/\/$/, "") || "~/.config/omarchy/plugins/io.github.joanreyero.calma"
   return "Set up Calma, the distraction blocker, on this machine. Read " + dir + "/SETUP.md first and follow it step by step with me: "
-    + "install it with sudo ./install.sh from that directory (I run the sudo lines in a terminal), "
-    + "talk me through the password choice, then turn what I want blocked into rules."
+    + "run the install yourself with pkexec, open the password step for me in a floating terminal, "
+    + "then ask what I want blocked and add the rules with pkexec."
 }
 
 function shellQuote(value) {

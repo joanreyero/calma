@@ -7,9 +7,12 @@ follow and YouTube has no home feed, Shorts or recommendations. **Tightening** a
 always free. **Loosening** (more time, removing a site or a rule, uninstalling) needs the
 **Calma password**, set once; give it to someone else and it's out of reach.
 
-Work with the person one step at a time. You run every command that needs no password; the
-person runs the `sudo` ones in a terminal (give them the exact line and copy it to the
-clipboard with `wl-copy`). Never ask for, store or type their Calma password.
+Work with the person one step at a time, and **run the commands yourself**. Root steps go
+through **`pkexec`**, which shows a graphical password dialog (Omarchy ships a polkit agent), so
+the person only types their login password; never make them copy commands into a terminal.
+The one exception is `calma password`: it must not pass through you, so open it in a floating
+terminal with `omarchy-launch-floating-terminal-with-presentation "sudo calma password"`.
+Never ask for, store or type their Calma password.
 
 ## Rules of engagement for agents
 
@@ -17,46 +20,46 @@ clipboard with `wl-copy`). Never ask for, store or type their Calma password.
   the units, the trust store in `/var/lib/calma`, nor by stopping or masking the daemon. If
   asked, say that loosening goes through `sudo calma set|remove|uninstall` with the password,
   and offer that instead. If the person has given the password away, that's the point.
-- Tightening on request is fine (`sudo calma set x --sessions 1`), as is adding rules.
+- Tightening on request is fine (`pkexec calma set x --sessions 1`), as is adding rules.
 - `calma status` and `calma open` / `calma close` need no privileges; use them freely.
 
-## 1. Install (person, in a terminal)
+## 1. Install (you, via pkexec)
 
-The Calma repository is itself the Omarchy shell plugin, so the plugin directory is the
-checkout to install from. If the bar widget is already there (that's where "Set up with the
-agent" lives), skip the first line.
-
-```sh
-omarchy plugin add https://github.com/joanreyero/calma --enable
-cd ~/.config/omarchy/plugins/io.github.joanreyero.calma && sudo ./install.sh
-```
-
-`install.sh` is idempotent (re-run it to upgrade). It installs the daemon (`calma.service`,
-refuses `systemctl stop`, restarts itself in a second), the watchdog timer, the Chromium
-policy and the extension (`/usr/share/calma/extension`, loaded through
-`/etc/chromium-flags.conf`). The bar widget needs nothing more: `omarchy plugin add --enable`
-already put it in the bar, and it switches from "Calma isn't set up" to the live view as soon
-as the daemon answers.
-
-## 2. Password (person, same terminal)
+The plugin dir is the checkout: `~/.config/omarchy/plugins/io.github.joanreyero.calma` (if the
+person installed by other means, find `manifest.json` with `omarchy plugin list`). Tell them a
+password dialog is about to appear, then:
 
 ```sh
-sudo calma password
+pkexec /home/<user>/.config/omarchy/plugins/io.github.joanreyero.calma/install.sh
 ```
+
+(`pkexec` needs an absolute path.) It's idempotent; re-run it to upgrade. It installs the daemon
+(`calma.service`, refuses `systemctl stop`, restarts itself in a second), the watchdog timer, the
+Chromium policy and the extension (`/usr/share/calma/extension`, loaded through
+`/etc/chromium-flags.conf`). Check with `calma doctor`.
+
+## 2. Password (the person, in a floating terminal you open)
 
 Explain the choice first: **with a password**, loosening is possible for whoever knows it;
 **without one, nothing can ever be loosened** (short of deliberate root surgery; see
 `docs/threat-model.md`). Suggest giving the password to a partner or friend. Changing it later
-needs the old one.
+needs the old one. Then:
 
-## 3. Rules: the person's words → a command
+```sh
+omarchy-launch-floating-terminal-with-presentation "sudo calma password"
+```
+
+They type their sudo password, then the Calma password twice, and close the window.
+`calma status` ends with "password set" when it's done.
+
+## 3. Rules: the person's words → a command (you, via pkexec)
 
 | They say | Command |
 |---|---|
-| "X twice a day, five minutes each" | `sudo calma add x --preset x --sessions 2 --minutes 5` |
-| "YouTube once a day, twenty minutes" | `sudo calma add youtube --preset youtube --sessions 1 --minutes 20` |
-| "an hour of Steam a day, in one go" | `sudo calma add steam --label Steam --domain store.steampowered.com --process steam --sessions 1 --minutes 60` |
-| "Reddit, completely" | `sudo calma add reddit --domain reddit.com --sessions 0 --minutes 1` |
+| "X twice a day, five minutes each" | `pkexec calma add x --preset x --sessions 2 --minutes 5` |
+| "YouTube once a day, twenty minutes" | `pkexec calma add youtube --preset youtube --sessions 1 --minutes 20` |
+| "an hour of Steam a day, in one go" | `pkexec calma add steam --label Steam --domain store.steampowered.com --process steam --sessions 1 --minutes 60` |
+| "Reddit, completely" | `pkexec calma add reddit --domain reddit.com --sessions 0 --minutes 1` |
 | "two sessions but no more than 15 min total" | add `--daily 15` |
 | "at least an hour between sessions" | add `--cooldown 60` |
 
@@ -65,7 +68,7 @@ needs the old one.
 - Without a preset, a session opens the whole site. Add domains with `--domain` (bare domain,
   subdomains included) and apps with `--process <name>` (killed within a second while blocked).
 - The day resets at 04:00 by default. Changing that later counts as loosening.
-- Several rules: one `sudo calma add` per rule, one per line (long lines wrap and split in paste).
+- Several rules: one `pkexec calma add` per rule, one per line (long lines wrap and split in paste).
 
 ## 4. Chromium and the bar
 
@@ -90,9 +93,9 @@ widget, then `calma close x`: the tab returns to the blocked page within a secon
 ## Everyday
 
 - `calma status`, `calma open <rule> [minutes]`, `calma close [rule]`, `calma log`.
-- Tighten any time: `sudo calma set youtube --minutes 10`, `sudo calma domain add x t.co`.
-- Loosen (password): `sudo calma set x --sessions 3`, `sudo calma remove steam`,
-  `sudo calma uninstall`.
+- Tighten any time (you, via pkexec): `pkexec calma set youtube --minutes 10`, `pkexec calma domain add x t.co`.
+- Loosen (the person, in a floating terminal, Calma password): `sudo calma set x --sessions 3`,
+  `sudo calma remove steam`, `sudo calma uninstall`.
 - "Why is X blocked?" → `calma status`: `Next` says when the next session is possible.
 
 ## Troubleshooting
@@ -107,4 +110,4 @@ widget, then `calma close x`: the tab returns to the blocked page within a secon
 - The widget says "Calma isn't running" although it's installed: `calma doctor`, then
   `calma log` for the daemon's last lines; the watchdog timer restarts it within a minute.
 - Upgrading: `omarchy plugin update io.github.joanreyero.calma` (or `git pull` in the plugin
-  directory), then `sudo ./install.sh` there.
+  directory), then `pkexec <plugin dir>/install.sh`.

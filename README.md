@@ -30,9 +30,9 @@ rest for you:
 
 1. `omarchy plugin add https://github.com/joanreyero/calma --enable`
 2. Click the Calma leaf in the bar → **Set up with the agent**. Your default coding agent
-   opens with [SETUP.md](SETUP.md) and walks you through the install (you run the `sudo`
-   lines), the password choice and your first rules. Prefer to do it by hand? Follow
-   [SETUP.md](SETUP.md) yourself.
+   opens with [SETUP.md](SETUP.md) and does the install for you (one password dialog), opens
+   a terminal for you to set the Calma password, then turns what you want blocked into rules.
+   Prefer to do it by hand? Follow [SETUP.md](SETUP.md) yourself.
 
 The manual path, from the plugin directory or any clone:
 

@@ -122,7 +122,7 @@ test("setupCommand hands SETUP.md in the plugin dir to the agent, shell-quoted",
   const cmd = Model.setupCommand("/home/j/it's here")
   assert.ok(cmd.startsWith("omarchy agent prompt '"))
   assert.ok(cmd.includes("Read /home/j/it'\\''s here/SETUP.md first"))
-  assert.ok(cmd.includes("sudo ./install.sh from that directory"))
+  assert.ok(cmd.includes("run the install yourself with pkexec"))
   assert.ok(cmd.endsWith("rules.'"))
   assert.equal(Model.shellQuote("a'b"), "'a'\\''b'")
 })

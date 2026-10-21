@@ -10,6 +10,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -718,9 +719,22 @@ def cmd_uninstall(args: argparse.Namespace, argv: list[str]) -> int:
         _systemctl("reset-failed", "calma.service")
     try:
         pid = int(paths.pid_file().read_text().strip())
-        os.kill(pid, 15)
     except (OSError, ValueError):
-        pass
+        pid = None
+    if pid is not None:
+        try:
+            os.kill(pid, 15)
+        except OSError:
+            pid = None
+    # Wait for the daemon to flush and exit before removing anything it writes,
+    # or its last tick re-creates /var/lib/calma, the policy and the hosts block.
+    deadline = time.monotonic() + 8
+    while pid is not None and time.monotonic() < deadline:
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            break
+        time.sleep(0.1)
     if hosts.remove_block():
         removed.append(f"Calma block in {paths.hosts_file()}")
     if paths.policy_file().exists():
