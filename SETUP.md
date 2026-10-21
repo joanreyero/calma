@@ -1,7 +1,3 @@
----
-name: calma-setup
-description: "Set up and operate Calma, the bulletproof distraction blocker for Omarchy (Arch, Hyprland, Chromium): install it, set the password that gates every loosening, turn a person's wish into rules ('X twice a day, five minutes each', 'YouTube once a day for twenty minutes', 'block Steam on weekdays'), use the x and youtube presets (minimal versions during sessions), add the bar widget, restart Chromium, check every layer with calma doctor, and read status. Use when someone asks to block or limit a website or app, set up Calma, start or end a session, change a budget, or asks why a site is blocked. Also the rules of engagement for agents: tightening is free, loosening needs the password, and agents never help bypass it."
----
 
 # Setting up Calma
 

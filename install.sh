@@ -212,25 +212,6 @@ if [ "$WITH_PLUGIN" -eq 1 ]; then
   fi
 fi
 
-# --- 8. agent skill for the invoking user -----------------------------------
-# Links skills/calma-setup into ~/.agents/skills (read by Claude Code, Codex and
-# Pi) so an agent can set up and operate Calma for the person.
-if [ -z "$DESTDIR" ] && [ -d "$SRC/skills/calma-setup" ]; then
-  step "Agent skill"
-  skill_user="${SUDO_USER:-}"
-  if [ -z "$skill_user" ] || [ "$skill_user" = "root" ]; then
-    skill_user="$(id -un)"
-  fi
-  skill_home="$(getent passwd "$skill_user" | cut -d: -f6)"
-  if [ -n "$skill_home" ]; then
-    skills_dir="$skill_home/.agents/skills"
-    install -d -m 0755 "$skills_dir"
-    ln -sfn "$SRC/skills/calma-setup" "$skills_dir/calma-setup"
-    [ "$(id -un)" = "$skill_user" ] || chown -h "$skill_user:" "$skills_dir/calma-setup" "$skills_dir" 2>/dev/null || true
-    say "$skills_dir/calma-setup -> $SRC/skills/calma-setup"
-  fi
-fi
-
 # --- done -------------------------------------------------------------------
 step "Done."
 cat <<EOF

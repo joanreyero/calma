@@ -121,15 +121,6 @@ daemon would be the easiest loosening of all, so it is not offered.
 (default 4). Changing it in either direction counts as loosening and needs the password, since
 moving the reset is a way to get an extra day.
 
-## Setting it up with an agent
-
-`install.sh` links [`skills/calma-setup`](skills/calma-setup/SKILL.md) into `~/.agents/skills/`,
-where Claude Code, Codex and Pi find it. Tell your agent "set up Calma" or "block X for me,
-twice a day for five minutes" and it walks you through install, password and rules, running
-what it can and handing you the `sudo` lines. The skill also tells agents the rules of
-engagement: tightening is free, loosening goes through the password, and they never help
-bypass Calma.
-
 ## Uninstalling
 
 ```sh
