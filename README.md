@@ -155,6 +155,13 @@ daemon would be the easiest loosening of all, so it is not offered.
 (default 4). Changing it in either direction counts as loosening and needs the password, since
 moving the reset is a way to get an extra day.
 
+## Scripted installs
+
+The repo doubles as the plugin's `setup` hook: after `omarchy plugin add`, running
+`~/.config/omarchy/plugins/io.github.joanreyero.calma/setup` installs the system part with
+`sudo` (dotfiles that install Omarchy plugins from a list and run each plugin's `setup` get
+Calma for free). Rules and the password are per machine; set them afterwards.
+
 ## Uninstalling
 
 ```sh

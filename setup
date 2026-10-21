@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Omarchy plugin setup hook: after `omarchy plugin add`, installs Calma's system
+# part (daemon, Chromium policy, extension, units) with sudo. Idempotent: it
+# re-runs install.sh, which also upgrades. Rules and the password are per
+# machine and set afterwards: sudo calma password; sudo calma add ...
+set -euo pipefail
+cd "$(dirname "$(readlink -f "$0")")"
+if [ "$(id -u)" -eq 0 ]; then exec ./install.sh; fi
+exec sudo ./install.sh
