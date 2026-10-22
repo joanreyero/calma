@@ -29,3 +29,19 @@ nothing you build may weaken that model or help bypass a block.
 - Installing a build on a machine means `sudo ./install.sh` and a root
   daemon restart: that is the person's to run in their terminal, never yours.
   Test with the repository's own `tests/` and `dev/` tooling instead.
+
+## The machine rule: everything installable from dotfiles
+
+Nothing is configured on a machine only in place. Everything that is
+installed or configured on one of Joan's machines (packages, services, root
+files, plugins, agent settings, hooks, clones, launchers) lives in the
+**dotfiles** repository, wired into its `install.sh`, so a new machine comes
+up the same from one run. Joan's standing decision; it holds forever.
+
+- When your work needs such a change, don't make it by hand and move on:
+  hand it to the dotfiles expert — spawn `dotfiles-expert` with the exact
+  change as its task (`oats spawn dotfiles-expert --task-file …`), or mail a
+  running one — and name it in your hand-back.
+- If you had to apply something in place to unblock yourself, say so and
+  trigger the dotfiles expert in the same breath, so the repository catches
+  up before anyone forgets.
