@@ -1,0 +1,6 @@
+schemaVersion: 2
+name: calma-expert
+description: The calma expert: develops and maintains calma (calma.sh), the distraction blocker for Omarchy, in its own worktree.
+work: worktree      # its own branch in a git worktree of this repository
+knowledge: none     # the project's knowledge is its own docs/; no knowledge base yet
+launch: { harness: pi }
