@@ -61,14 +61,14 @@ and `Model.js` at the root, id `io.github.joanreyero.calma`. `omarchy plugin add
 into `~/.config/omarchy/plugins/` and `--enable` puts it in the right section of the bar.
 
 - With a session open it shows the rule's glyph and the countdown (`𝕏 4:32`). Idle, it hides
-  unless the `hideWhenIdle` setting is off. Click for a dropdown listing every rule with its
+  when `hideWhenIdle` is on; by default the leaf stays, dimmed, so a session is one click away. Click for a dropdown listing every rule with its
   state, today's sessions and minutes left, and a **Start N min** / **End now** button. Right
   click ends every open session; middle click refreshes.
 - Keyboard: `j`/`k` move, `enter` acts, `e` ends all, `r` refreshes.
 - Not installed yet: the widget is always visible, the leaf dimmed, and the dropdown offers
   **Set up with the agent**. Installed but the daemon doesn't answer: "Calma isn't running",
   with `calma doctor` as the hint and an **Open a terminal** button.
-- Settings (in the widget's `shell.json` entry): `hideWhenIdle` (default true) and `port`
+- Settings (in the widget's `shell.json` entry): `hideWhenIdle` (default false) and `port`
   (default 7390, matching `CALMA_PORT`).
 - IPC: `omarchy-shell calma status` (also `refresh`, `start <rule>`, `end [rule]`, `toggle`).
 

@@ -487,7 +487,7 @@ the Omarchy terminal theme applies). Commands:
 - Id `io.github.joanreyero.calma`, kinds `["service", "bar-widget"]`. `Service.qml` is
   instantiated once per shell and polls `GET /status` every 5 s plus `GET /events` as a
   long-poll; `Panel.qml` (one per bar) reads it and pushes its settings in. Hidden when no
-  session is open and setting `hideWhenIdle` is true (default true); otherwise shows the rule
+  session is open and setting `hideWhenIdle` is true (default false: the leaf stays, dimmed); otherwise shows the rule
   glyph and `m:ss`. Click → a dropdown listing every rule: state, `1/2 · 7 min left`, and a
   button "Start 5 min" / "End now". Colours from the shell theme, never hard-coded.
 - Three states, `Service.setupState`: `running` (daemon answers), `stopped` (unreachable but

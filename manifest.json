@@ -26,7 +26,7 @@
     "allowMultiple": false,
     "defaultSection": "right",
     "defaults": {
-      "hideWhenIdle": true,
+      "hideWhenIdle": false,
       "port": 7390
     },
     "schema": [
@@ -34,7 +34,7 @@
         "key": "hideWhenIdle",
         "type": "boolean",
         "label": "Hide the widget when no session is open",
-        "defaultValue": true
+        "defaultValue": false
       },
       {
         "key": "port",

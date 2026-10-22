@@ -8,7 +8,7 @@ import qs.Ui
 import "Model.js" as Model
 
 // Calma in the bar: the open session's glyph and m:ss countdown (hidden when
-// idle unless hideWhenIdle is off), and a dropdown listing every rule with its
+// idle, dimmed, unless hideWhenIdle is on), and a dropdown listing every rule with its
 // state, sessions and minutes left, and a Start / End button.
 Panel {
   id: root
@@ -19,7 +19,7 @@ Panel {
   property int cursorIndex: 0
   property bool cursorActive: false
 
-  readonly property bool hideWhenIdle: setting("hideWhenIdle", true) === true
+  readonly property bool hideWhenIdle: setting("hideWhenIdle", false) === true
   readonly property bool vertical: bar ? bar.vertical : false
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property color urgent: bar ? bar.urgent : Color.urgent
