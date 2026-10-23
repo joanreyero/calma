@@ -1,0 +1,9 @@
+schemaVersion: 2
+name: calma-developer
+description: "The calma developer: builds calma (the daemon, CLI, Chromium extension, bar plugin, installer and site of the distraction blocker for Omarchy) to the specs it is given, in its own worktree, through the adversarial review loop."
+work: worktree      # its own branch in a git worktree of this repository
+knowledge: none     # what it learns goes into the repository's docs and comments
+capabilities:
+  oats.developer: { from: package }
+  reyero.team-rules: { from: github.com/joanreyero/reyero-oats }
+launch: { harness: pi }
