@@ -53,6 +53,14 @@ With a dev daemon running on `127.0.0.1:7390`:
 For the real installed copy, `/etc/chromium-flags.conf` loads `/usr/share/calma/extension`;
 `sudo ./install.sh` re-copies it, then restart Chromium.
 
+## Reviews
+
+Every pull request is reviewed against [.agents/skills/review-guidelines/SKILL.md](.agents/skills/review-guidelines/SKILL.md):
+what every change keeps true, the test gate, the consumers to read. You can run the same
+review yourself before opening a PR: pi finds the `review-guidelines` skill in a checkout; in
+Claude Code or Codex point the agent at the file (the plugin validator forbids the `.claude/skills` symlink). The maintainer posts a verdict on the PR; merges are
+squash merges by the maintainer.
+
 ## Style
 
 - Python: stdlib only, type hints, `ruff`-clean, a docstring at the top of each file saying
