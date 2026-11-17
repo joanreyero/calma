@@ -7,7 +7,8 @@
  *   worker fails closed with the last known rules.
  * - Pings POST /ping on startup and every 30 s (alarm).
  * - Renders declarativeNetRequest dynamic rules: main_frame redirects to blocked.html for
- *   every domain of a blocked rule, and "home" redirects for open preset rules.
+ *   every domain of a blocked rule, and "home" redirects for open preset rules. A rule's
+ *   exempt hosts (sign-in endpoints, from /status) are left alone.
  * - webNavigation.onCommitted as belt and braces (also catches the policy error page).
  * - When a rule flips to blocked, open tabs on its domains are sent to the blocked page.
  * - Answers messages from the blocked page and content scripts.
@@ -20,6 +21,7 @@ const PING_ALARM = "calma-ping";
 const DOWN_GRACE_MS = 15_000; // daemon unreachable this long → treat every rule as blocked
 const DNR_BLOCK_BASE = 1000; // ids 1000+ : blocked-domain redirects
 const DNR_HOME_BASE = 100; // ids 100+  : home redirects for open preset rules
+const DNR_EXEMPT_BASE = 500; // ids 500+  : exempt hosts of blocked rules (allow, outranks the redirects)
 
 const BLOCKED_PAGE = chrome.runtime.getURL("blocked.html");
 
@@ -162,7 +164,10 @@ function ruleForUrl(url) {
   } catch (e) {
     return null;
   }
+  host = host.toLowerCase();
   for (const [name, rule] of Object.entries(status.rules)) {
+    // exempt hosts (a preset's sign-in endpoints, from /status) belong to no rule
+    if ((rule.exempt || []).includes(host)) continue;
     for (const d of rule.domains || []) {
       if (hostMatches(host, d)) return name;
     }
@@ -216,11 +221,23 @@ function buildRules() {
   const down = daemonDown();
   let blockId = DNR_BLOCK_BASE;
   let homeId = DNR_HOME_BASE;
+  let exemptId = DNR_EXEMPT_BASE;
   const seenDomains = new Set();
 
   for (const [name, rule] of Object.entries(status.rules)) {
     const state = down ? "blocked" : rule.state === "open" ? "open" : "blocked";
     if (state === "blocked") {
+      for (const host of rule.exempt || []) {
+        rules.push({
+          id: exemptId++,
+          priority: 20,
+          action: { type: "allow" },
+          condition: {
+            regexFilter: `^https?://${escapeRe(host.toLowerCase())}([/?#].*)?$`,
+            resourceTypes: ["main_frame"],
+          },
+        });
+      }
       for (const domain of rule.domains || []) {
         const key = domain.toLowerCase();
         if (seenDomains.has(key)) continue;

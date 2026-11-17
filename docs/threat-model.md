@@ -81,6 +81,9 @@ happens), so the person holding the password can see that it happened.
   removal is a conscious project, not a reflex.
 - **Other browsers during a session.** The minimal versions exist only in Chromium. Firefox gets
   the full site while a rule is open. The hosts layer still blocks it when the rule is blocked.
+- **Sign-in hosts of a blocked site.** A preset may exempt exact hosts that carry a sign-in
+  step and no content. Today that is `accounts.youtube.com`, which Google redirects every login
+  through; it is reachable while YouTube is blocked, and nothing to watch is served from it.
 - **Mobile devices and other computers.** Calma knows about one machine.
 - **Network-level enforcement.** No DNS server, no firewall rules, no proxy. A hosts block is
   what you get; a browser doing its own DNS-over-HTTPS bypasses it (Chromium is still covered

@@ -536,6 +536,8 @@ def cmd_presets(_args: argparse.Namespace) -> int:
         say(f"    open      {', '.join(p['allow'])}")
         if p["block"]:
             say(f"    still off {', '.join(p['block'])}")
+        if p.get("exempt"):
+            say(f"    never off {', '.join(p['exempt'])}")
         say(f"    home      {p['home']}")
         say()
     say(C.dim("  A preset gives you the minimal version of the site during a session; outside it, it's blocked."))

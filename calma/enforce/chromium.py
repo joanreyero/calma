@@ -34,6 +34,10 @@ def policy(rules: dict, open_rules: set[str] | frozenset[str]) -> dict:
                 _add(blocklist, b)
             for d in ex["extra_domains"]:
                 _add(allowlist, d)
+    # exempt hosts (a preset's sign-in endpoints) are allowed whatever the rule's state
+    for ex in expanded.values():
+        for h in ex["exempt"]:
+            _add(allowlist, h)
     return {"URLBlocklist": blocklist, "URLAllowlist": allowlist}
 
 

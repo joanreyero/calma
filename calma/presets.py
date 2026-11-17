@@ -67,6 +67,10 @@ PRESETS: dict[str, dict] = {
         ],
         # home, /shorts, /feed/trending, /gaming stay blocked: only the allow list opens paths
         "block": [],
+        # exact hosts that are never blocked: Google's sign-in redirects every login through
+        # accounts.youtube.com to set the YouTube cookie, so blocking it breaks signing in to
+        # Google (in the browser or from a CLI); it serves no videos or feeds
+        "exempt": ["accounts.youtube.com"],
         "home": "https://www.youtube.com/feed/subscriptions",
     },
 }

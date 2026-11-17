@@ -16,7 +16,7 @@ def test_policy_all_blocked(example_rules):
     assert pol["URLBlocklist"] == [
         "x.com", "twitter.com", "youtube.com", "youtu.be", "youtube-nocookie.com", "store.steampowered.com",
     ]
-    assert pol["URLAllowlist"] == []
+    assert pol["URLAllowlist"] == ["accounts.youtube.com"]
 
 
 def test_policy_x_open_youtube_blocked(example_rules):
@@ -24,7 +24,7 @@ def test_policy_x_open_youtube_blocked(example_rules):
     assert pol["URLBlocklist"][:3] == ["youtube.com", "youtu.be", "youtube-nocookie.com"]
     assert "x.com/explore" in pol["URLBlocklist"] and "x.com/i/grok" in pol["URLBlocklist"]
     assert "x.com" not in pol["URLBlocklist"]
-    assert pol["URLAllowlist"] == ["x.com", "twitter.com"]
+    assert pol["URLAllowlist"] == ["x.com", "twitter.com", "accounts.youtube.com"]
 
 
 def test_policy_preset_open_with_extra_domains(example_rules):
@@ -38,9 +38,21 @@ def test_policy_preset_open_with_extra_domains(example_rules):
     assert "invidious.io" in closed["URLBlocklist"]
 
 
+def test_policy_exempt_host_allowed_in_every_state(example_rules):
+    """Google sign-in passes through accounts.youtube.com: allowed blocked or open, nothing else is."""
+    v = _v(example_rules)
+    for open_rules in (frozenset(), frozenset({"youtube"})):
+        assert "accounts.youtube.com" in chromium.policy(v, open_rules)["URLAllowlist"]
+    blocked = chromium.policy(v, frozenset())
+    assert "youtube.com" in blocked["URLBlocklist"]
+    assert [a for a in blocked["URLAllowlist"] if "youtube" in a] == ["accounts.youtube.com"]
+    del v["rules"]["youtube"]
+    assert "accounts.youtube.com" not in chromium.policy(v, frozenset())["URLAllowlist"]
+
+
 def test_policy_non_preset_open(example_rules):
     pol = chromium.policy(_v(example_rules), frozenset({"steam"}))
-    assert pol["URLAllowlist"] == ["store.steampowered.com"]
+    assert pol["URLAllowlist"] == ["store.steampowered.com", "accounts.youtube.com"]
     assert "store.steampowered.com" not in pol["URLBlocklist"]
 
 
@@ -55,7 +67,8 @@ def test_write_policy_only_on_change(example_rules):
     assert not chromium.write_policy(v, frozenset())
     assert paths.policy_file().stat().st_mtime_ns == mtime
     assert chromium.write_policy(v, frozenset({"x"}))
-    assert json.loads(paths.policy_file().read_text())["URLAllowlist"] == ["x.com", "twitter.com"]
+    written = json.loads(paths.policy_file().read_text())
+    assert written["URLAllowlist"] == ["x.com", "twitter.com", "accounts.youtube.com"]
     assert chromium.policy_ok(v, frozenset({"x"}))
 
 

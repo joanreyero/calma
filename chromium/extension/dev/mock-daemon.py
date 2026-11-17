@@ -81,6 +81,7 @@ PRESETS = {
         "label": "YouTube",
         "glyph": "",
         "domains": ["youtube.com", "youtu.be", "youtube-nocookie.com"],
+        "exempt": ["accounts.youtube.com"],
         "home": "https://www.youtube.com/feed/subscriptions",
     },
 }

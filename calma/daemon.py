@@ -284,6 +284,7 @@ class Daemon:
             "glyph": ex["glyph"],
             "preset": ex["preset"],
             "domains": ex["domains"],
+            "exempt": ex["exempt"],
             "processes": ex["processes"],
             "home": ex["home"],
             "sessions_per_day": rule["sessions_per_day"],
