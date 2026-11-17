@@ -139,13 +139,14 @@ def test_tick_renders_and_reloads(write_example, example_rules, caplog):
     d.load_rules()
     d.tick()
     pol = json.loads(paths.policy_file().read_text())
-    assert "x.com" in pol["URLBlocklist"] and pol["URLAllowlist"] == []
+    assert "x.com" in pol["URLBlocklist"] and pol["URLAllowlist"] == ["accounts.youtube.com"]
     assert "# calma:begin" in paths.hosts_file().read_text()
     assert paths.state_file().exists()
     code, out = d.open("x")
     assert code == 200 and out["rule"]["state"] == "open"
     pol = json.loads(paths.policy_file().read_text())
-    assert pol["URLAllowlist"] == ["x.com", "twitter.com"] and "x.com/explore" in pol["URLBlocklist"]
+    assert pol["URLAllowlist"] == ["x.com", "twitter.com", "accounts.youtube.com"]
+    assert "x.com/explore" in pol["URLBlocklist"]
     assert "x.com" not in paths.hosts_file().read_text()
     # rules file changes are picked up on the next tick (mtime/inode)
     tighter = copy.deepcopy(example_rules)
@@ -158,7 +159,7 @@ def test_tick_renders_and_reloads(write_example, example_rules, caplog):
     assert d.state.sessions["x"]["ends_mono"] <= d.state.sessions["x"]["started_mono"] + 60
     code, out = d.close("x")
     assert code == 200 and out["closed"] == ["x"] and out["rule"]["state"] == "blocked"
-    assert json.loads(paths.policy_file().read_text())["URLAllowlist"] == []
+    assert json.loads(paths.policy_file().read_text())["URLAllowlist"] == ["accounts.youtube.com"]
 
 
 def test_open_errors(write_example, example_rules):
@@ -187,6 +188,7 @@ def test_status_shape(write_example):
         assert key in st
     x = st["rules"]["x"]
     assert x["domains"] == ["x.com", "twitter.com"] and x["glyph"] == "𝕏" and x["home"] == "https://x.com/home"
+    assert x["exempt"] == [] and st["rules"]["youtube"]["exempt"] == ["accounts.youtube.com"]
     assert x["state"] == "blocked" and x["session"] is None and x["can_open"] is True
     assert x["cannot_open_reason"] is None and x["next_opportunity"] is None
     assert x["sessions_left"] == 2 and x["seconds_left"] == 600
@@ -428,7 +430,7 @@ def test_session_expiry_in_loop_charges_boottime(write_example):
     d.tick(now_wall=1_000_500.0, now_mono=start + 500)
     assert "x" not in d.state.sessions
     assert d.state.usage("x")["seconds_used"] == 120  # charged exactly the session, not the gap
-    assert json.loads(paths.policy_file().read_text())["URLAllowlist"] == []
+    assert json.loads(paths.policy_file().read_text())["URLAllowlist"] == ["accounts.youtube.com"]
     assert "0.0.0.0 x.com" in paths.hosts_file().read_text()
 
 
@@ -460,7 +462,7 @@ def test_watchdog_fails_closed_after_reboot(write_example, capsys, monkeypatch):
     d.open("x")
     d.state.save(force=True)
     pol = json.loads(paths.policy_file().read_text())
-    assert pol["URLAllowlist"] == ["x.com", "twitter.com"]
+    assert pol["URLAllowlist"] == ["x.com", "twitter.com", "accounts.youtube.com"]
     # same boot: the watchdog respects the open session
     assert daemon_mod.watchdog() == 0
     assert "nothing to repair" in capsys.readouterr().out
@@ -471,7 +473,7 @@ def test_watchdog_fails_closed_after_reboot(write_example, capsys, monkeypatch):
     out = capsys.readouterr().out
     assert "refreshed" in out and "hosts" in out
     pol = json.loads(paths.policy_file().read_text())
-    assert pol["URLAllowlist"] == [] and "x.com" in pol["URLBlocklist"]
+    assert pol["URLAllowlist"] == ["accounts.youtube.com"] and "x.com" in pol["URLBlocklist"]
     assert "0.0.0.0 x.com" in paths.hosts_file().read_text()
 
 

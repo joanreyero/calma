@@ -214,7 +214,7 @@ def is_loosening(old: dict, new: dict) -> list[str]:
 
 
 def expand(name: str, rule: dict) -> dict:
-    """A rule with its preset merged in: label, glyph, domains, hosts, allow, block, home."""
+    """A rule with its preset merged in: label, glyph, domains, hosts, allow, block, exempt, home."""
     p = presets.get(rule.get("preset")) or {}
     extras = [d for d in rule.get("domains", []) if d not in p.get("domains", [])]
     domains = list(p.get("domains", [])) + extras
@@ -233,6 +233,7 @@ def expand(name: str, rule: dict) -> dict:
         "hosts": hosts,
         "allow": list(p.get("allow", [])),
         "block": list(p.get("block", [])),
+        "exempt": list(p.get("exempt", [])),
         "home": p.get("home") or (f"https://{extras[0]}/" if extras else None),
         "processes": list(rule.get("processes", [])),
         "sessions_per_day": rule["sessions_per_day"],

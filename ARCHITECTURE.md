@@ -191,6 +191,8 @@ PRESETS = {
               "youtube.com/c/", "youtube.com/user/", "youtube.com/embed/", "youtube-nocookie.com/embed/",
               "youtu.be", "youtube.com/account", "youtube.com/paid_memberships", "youtube.com/premium"],
     "block": [],   # home, /shorts, /feed/trending, /gaming stay blocked because only the allow list opens paths
+    # exact hosts never blocked: Google's sign-in redirects through accounts.youtube.com
+    "exempt": ["accounts.youtube.com"],
     "home": "https://www.youtube.com/feed/subscriptions",
   },
 }
@@ -204,14 +206,19 @@ Shorts and allows watching. Generated policy for the file above with `x` open an
 {
   "URLBlocklist": ["youtube.com", "youtu.be", "youtube-nocookie.com",
                    "x.com/explore", "x.com/i/grok", "..."],
-  "URLAllowlist": ["x.com", "twitter.com"]
+  "URLAllowlist": ["x.com", "twitter.com", "accounts.youtube.com"]
 }
 ```
 
-For a blocked rule: every domain of the rule goes into `URLBlocklist`, nothing in the allowlist.
+For a blocked rule: every domain of the rule goes into `URLBlocklist`, nothing in the allowlist
+except the preset's `exempt` hosts.
 For an open rule with a preset: `allow` → `URLAllowlist`, `block` → `URLBlocklist`, and the
 rule's plain `domains` (non-preset extras) → `URLAllowlist`. For an open rule without a preset:
-`domains` → `URLAllowlist`. Always write both keys (possibly empty lists) so a stale policy from
+`domains` → `URLAllowlist`. A preset's `exempt` hosts go into `URLAllowlist` in every state:
+they are exact host names that carry a sign-in step and no content (Google redirects every
+login through `accounts.youtube.com`, so blocking it breaks signing in to Google itself), and
+being longer than the domain they win over it. They are not in `hosts` either. Adding one to a
+preset opens something that was blocked, so it needs Joan's yes like any loosening. Always write both keys (possibly empty lists) so a stale policy from
 an older version can't linger. Rewrite the file only when its content changes (Chromium
 reloads policy files on change).
 
@@ -277,6 +284,7 @@ send it).
       "glyph": "𝕏",
       "preset": "x",
       "domains": ["x.com", "twitter.com"],
+      "exempt": [],
       "processes": [],
       "home": "https://x.com/home",
       "sessions_per_day": 2, "session_minutes": 5, "daily_minutes": 10, "cooldown_minutes": 0,
@@ -310,7 +318,8 @@ send it).
 `state` ∈ `"open"`, `"blocked"`. `cannot_open_reason` ∈ `null`, `"already open"`, `"no sessions
 left today"`, `"no time left today"`, `"cooling down"`, `"always blocked"`. `next_opportunity`
 is a unix timestamp when something is known (reset or cooldown end), else null.
-`domains` is the fully expanded list (preset + extras). `problems` is a list of strings from the
+`domains` is the fully expanded list (preset + extras). `exempt` (every rule has it, `[]`
+without a preset) lists the preset's exempt hosts. `problems` is a list of strings from the
 self-check (missing policy file, extension flag missing in a user's chromium-flags.conf, tamper
 events today, …).
 
@@ -439,7 +448,8 @@ the Omarchy terminal theme applies). Commands:
   cache; pings `/ping` on start and every 30 s (alarm); maintains **declarativeNetRequest dynamic
   rules**: for every *blocked* rule's domain a `main_frame` redirect to
   `blocked.html?rule=<name>&url=<encoded original>`; for open rules with a preset `home` redirect
-  (YouTube `/` → `/feed/subscriptions`; X `/` → `/home`). Also `webNavigation.onCommitted` → if the
+  (YouTube `/` → `/feed/subscriptions`; X `/` → `/home`). A blocked rule's `exempt` hosts get a
+  higher-priority `allow` rule and are owned by no rule in the checks below. Also `webNavigation.onCommitted` → if the
   URL matches a blocked rule, `tabs.update` to the blocked page (belt and braces for the
   Chromium policy error page). When a rule flips to blocked, every open tab on its domains is
   navigated to the blocked page. Answers messages from content scripts: `{type: "status"}` →
